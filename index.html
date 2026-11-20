@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nexus ERP · 一天的智能</title>
+<style>
+:root{
+  --bg:#eceff3;
+  --panel:#ffffff;
+  --ink:#0d1117;
+  --ink2:#39414f;
+  --muted:#7b8494;
+  --faint:#9aa3b0;
+  --line:#e2e6ec;
+  --line-soft:#eef0f5;
+  --accent:#2f4fd8;
+  --red:#c4392f;
+  --red-soft:#fdf0ee;
+  --amber:#a8720f;
+  --amber-soft:#fdf5e3;
+  --green:#187a52;
+  --green-soft:#ebf7f0;
+  --radius:16px;
+  --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px -12px rgba(16,24,40,.14);
+  --tone:#2f4fd8;
+  --tone-soft:#eef1ff;
+  --tone-line:#dbe1f8;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Inter","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  color:var(--ink);background:var(--bg);
+  -webkit-font-smoothing:antialiased;font-size:14px;
+}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+::selection{background:#d6ddfb}
+.app{height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+/* ============ top ============ */
+.top{
+  height:58px;flex:none;display:flex;align-items:center;gap:18px;
+  padding:0 18px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);z-index:30;position:relative;
+}
+.brand{display:flex;align-items:center;gap:10px;flex:none}
+.mark{
+  width:26px;height:26px;border-radius:8px;flex:none;
+  background:linear-gradient(145deg,#1b2559,#2f4fd8 55%,#6b8cff);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);display:grid;place-items:center;
+}
+.mark:after{content:"";width:9px;height:9px;border-radius:3px;background:#fff;opacity:.92;transform:rotate(45deg)}
+.brand b{font-size:14px;letter-spacing:.2px;font-weight:650}
+.brand span{color:var(--faint);font-size:12px;letter-spacing:.3px}
+
+.ws{display:flex;align-items:center;gap:7px;flex:1;min-width:0;overflow:hidden;mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.ws-label{font-size:11px;color:var(--faint);letter-spacing:.6px;flex:none}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;flex:none;
+  border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12px;color:var(--ink2);
+  white-space:nowrap;transition:.18s;animation:chipIn .4s cubic-bezier(.2,.7,.3,1) both;
+}
+.chip .dot{width:5px;height:5px;border-radius:2px;background:var(--tone);opacity:.8}
+.chip.new{background:var(--tone-soft);border-color:var(--tone-line);color:var(--tone)}
+@keyframes chipIn{from{opacity:0;transform:translateY(-6px) scale(.94)}to{opacity:1;transform:none}}
+.ws-empty{font-size:12px;color:#b7bfcb;white-space:nowrap}
+
+.role{display:flex;align-items:center;gap:9px;flex:none;padding-left:16px;border-left:1px solid var(--line)}
+.role .av{
+  width:30px;height:30px;border-radius:10px;display:grid;place-items:center;
+  font-size:12px;font-weight:600;color:#fff;background:#4a5a7a;
+  transition:background .4s;
+}
+.role .tx{line-height:1.3;transition:opacity .2s;max-width:172px;overflow:hidden}
+.role .tx b{display:block;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role .tx span{display:block;font-size:10.5px;color:var(--faint);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role.swap .tx{animation:swapTx .45s ease both}
+.role.swap .av{animation:swapAv .45s ease both}
+@keyframes swapTx{0%{opacity:0;transform:translateX(6px)}100%{opacity:1;transform:none}}
+@keyframes swapAv{0%{transform:scale(.85);opacity:.5}100%{transform:none;opacity:1}}
+
+/* ============ layout ============ */
+main{flex:1;min-height:0;display:flex}
+
+/* ============ chat ============ */
+.chat{width:394px;flex:none;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-right:1px solid var(--line)}
+.feed{flex:1;min-height:0;overflow-y:auto;padding:20px 20px 10px;scroll-behavior:smooth}
+.feed::-webkit-scrollbar{width:8px}
+.feed::-webkit-scrollbar-thumb{background:#e0e4ec;border-radius:8px;border:2px solid #fff}
+
+.divider{display:flex;align-items:center;gap:10px;margin:6px 0 18px;animation:fade .5s both}
+.divider .line{flex:1;height:1px;background:var(--line)}
+.divider .tx{font-size:10.5px;color:var(--faint);letter-spacing:.5px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.divider .tx i{width:4px;height:4px;border-radius:50%;background:#cbd2de}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+.msg{margin-bottom:16px;animation:msgIn .4s cubic-bezier(.2,.7,.3,1) both}
+@keyframes msgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.msg .head{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:11px;color:var(--faint);letter-spacing:.3px}
+.msg .head .ai-dot{width:14px;height:14px;border-radius:4.5px;background:linear-gradient(145deg,#1b2559,#2f4fd8);display:grid;place-items:center;flex:none}
+.msg .head .ai-dot:after{content:"";width:5px;height:5px;background:#fff;border-radius:1.5px;transform:rotate(45deg)}
+.msg .body{font-size:13.6px;line-height:1.75;color:var(--ink2);white-space:pre-wrap;word-break:break-word}
+.msg .body b{font-weight:600;color:var(--ink)}
+.msg .body code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.3px;background:#f3f5f8;padding:1px 4.5px;border-radius:4px;color:#3a4a63}
+.msg.me{display:flex;flex-direction:column;align-items:flex-end}
+.msg.me .body{background:#f1f3f8;border:1px solid #e8ebf2;border-radius:14px 14px 4px 14px;padding:8px 13px;max-width:88%;color:var(--ink)}
+
+.typing{display:inline-flex;gap:4px;padding:6px 0}
+.typing i{width:5px;height:5px;border-radius:50%;background:#b9c0cd;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.18s}
+.typing i:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-2px)}}
+
+/* trace */
+.trace{margin-top:9px;border-left:2px solid #e7eaf1;padding-left:10px;overflow:hidden;transition:.3s}
+.trace .tr{font-size:11.5px;color:#96a0af;line-height:1.75;display:flex;align-items:center;gap:6px;animation:trIn .35s both}
+.trace .tr:before{content:"";width:3.5px;height:3.5px;border-radius:50%;background:#cbd3e0;flex:none}
+.trace .tr.done:before{background:#9db3e0}
+@keyframes trIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+.trace.collapsed{max-height:22px}
+.trace .sum{display:none;font-size:11px;color:#a6b0c0;cursor:pointer;align-items:center;gap:5px}
+.trace.collapsed .sum{display:flex}
+.trace.collapsed .tr{display:none}
+
+/* chat footer */
+.chatfoot{
+  flex:none;height:44px;display:flex;align-items:center;gap:10px;padding:0 20px 12px;
+  font-size:11.5px;color:var(--faint);
+}
+.live{display:inline-flex;align-items:center;gap:6px;color:#8a93a3}
+.live i{width:6px;height:6px;border-radius:50%;background:#31b06e;box-shadow:0 0 0 3px rgba(49,176,110,.14);animation:livePulse 1.8s infinite}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 3px rgba(49,176,110,.14)}50%{box-shadow:0 0 0 6px rgba(49,176,110,0)}}
+.chatfoot .sp{flex:1}
+.chatfoot .kbd{font-size:10.5px;color:#b6bec9}
+
+/* ============ canvas ============ */
+.canvas{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:background .6s}
+.canvas[data-tone="ops"]{--tone:#2f4fd8;--tone-soft:#eef1ff;--tone-line:#dbe1f8}
+.canvas[data-tone="buy"]{--tone:#a8620f;--tone-soft:#fdf4e7;--tone-line:#f0dfc2}
+.canvas[data-tone="fin"]{--tone:#13795b;--tone-soft:#e9f6f0;--tone-line:#cdeadd}
+.canvas[data-tone="qms"]{--tone:#6d3fc4;--tone-soft:#f3edfd;--tone-line:#e2d7f9}
+.canvas[data-tone="gov"]{--tone:#b03434;--tone-soft:#fdf0ee;--tone-line:#f3d8d4}
+.canvas[data-tone="dec"]{--tone:#1f3fa8;--tone-soft:#edf1ff;--tone-line:#d8e0fa}
+.canvas:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,#d5dae4 1px,transparent 0);
+  background-size:24px 24px;
+  mask-image:radial-gradient(120% 90% at 30% 0%,#000 18%,transparent 76%);
+  opacity:.72;
+}
+.canvas:after{
+  content:"";position:absolute;left:-10%;top:-30%;width:70%;height:90%;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,var(--tone-soft) 0%,transparent 62%);
+  opacity:.85;transition:.8s;
+}
+.canvas-head{flex:none;display:flex;align-items:center;gap:14px;padding:14px 26px 8px;position:relative;z-index:2}
+.intent{display:flex;align-items:center;gap:9px;flex:1;min-width:0;font-size:12px;color:var(--muted);overflow:hidden}
+.intent .tag{
+  display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 8px;border-radius:6px;
+  background:var(--tone-soft);border:1px solid var(--tone-line);color:var(--tone);font-size:11px;flex:none;
+  transition:.4s;
+}
+.intent .tag:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--tone);opacity:.75}
+.intent .k{color:#a9b2bf;font-size:11px;letter-spacing:.4px}
+.intent .v{color:var(--ink2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.intent .sep{width:1px;height:11px;background:var(--line);flex:none}
+
+.tools{display:flex;gap:8px;flex:none}
+.tools button{
+  height:29px;padding:0 11px;border-radius:9px;border:1px solid var(--line);
+  background:rgba(255,255,255,.85);font-size:12.5px;color:var(--ink2);transition:.16s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.tools button:hover{border-color:#c3cbe0;background:#fff;color:var(--ink);box-shadow:0 2px 10px -6px rgba(16,24,40,.4)}
+.tools button.primary{background:#111827;border-color:#111827;color:#fff}
+.tools button.primary:hover{background:#000;color:#fff}
+.tools svg{width:13px;height:13px;opacity:.85}
+
+.stage{flex:1;min-height:0;overflow-y:auto;padding:4px 26px 88px;position:relative;z-index:2}
+.stage::-webkit-scrollbar{width:10px}
+.stage::-webkit-scrollbar-thumb{background:#dbe0e9;border-radius:10px;border:3px solid transparent;background-clip:content-box}
+
+/* player */
+.player{
+  position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:12;
+  display:flex;align-items:center;gap:10px;height:42px;padding:0 12px;
+  background:rgba(255,255,255,.82);backdrop-filter:blur(14px);
+  border:1px solid rgba(210,216,228,.9);border-radius:999px;
+  box-shadow:0 8px 30px -12px rgba(16,24,40,.35),0 1px 2px rgba(16,24,40,.05);
+}
+.player button.ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--ink2);transition:.16s}
+.player button.ic:hover{background:#eff2f8;color:var(--ink)}
+.player .sp{width:1px;height:16px;background:#e2e6ee}
+.rail{display:flex;align-items:center;gap:6px}
+.rail .n{
+  width:22px;height:22px;border-radius:7px;display:grid;place-items:center;
+  font-size:10px;color:#b3bac6;font-variant-numeric:tabular-nums;transition:.2s;cursor:pointer;
+}
+.rail .n:hover{background:#eff2f8;color:var(--ink2)}
+.rail .n.done{color:#8f99a8;background:#f2f4f8}
+.rail .n.now{background:#111827;color:#fff;box-shadow:0 2px 8px -2px rgba(0,0,0,.5)}
+.rail .n.now:after{content:"";position:absolute}
+.player .spd{font-size:11px;color:#7b8494;padding:0 6px;height:26px;border-radius:7px;transition:.16s;font-variant-numeric:tabular-nums}
+.player .spd:hover{background:#eff2f8;color:var(--ink)}
+
+/* ============ surface ============ */
+.surface{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.994)}to{opacity:1;transform:none}}
+
+.s-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:8px 0 18px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.6px;
+  color:var(--tone);background:var(--tone-soft);border:1px solid var(--tone-line);
+  border-radius:6px;padding:3px 8px;margin-bottom:10px;transition:.4s;
+}
+.eyebrow:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--tone);opacity:.75}
+.s-head h2{margin:0;font-size:21px;font-weight:650;letter-spacing:-.3px;color:var(--ink)}
+.s-head .sub{margin:6px 0 0;font-size:12.5px;color:var(--muted);line-height:1.6}
+.s-meta{display:flex;gap:22px;flex:none;padding-top:4px}
+.s-meta div{text-align:right}
+.s-meta b{display:block;font-size:18px;font-weight:650;letter-spacing:-.3px;color:var(--ink);font-variant-numeric:tabular-nums}
+.s-meta span{font-size:10.5px;color:var(--faint)}
+.s-foot{
+  margin-top:16px;padding-top:11px;border-top:1px solid var(--line-soft);
+  display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--faint);
+}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+/* brief */
+.todo{display:flex;flex-direction:column;gap:9px}
+.t-row{
+  display:flex;align-items:flex-start;gap:13px;padding:14px 16px;border-radius:13px;
+  background:#fff;border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,40,.03);transition:.18s;
+  animation:rise .45s both;
+}
+.t-row:hover{border-color:#cfd6e6;box-shadow:0 8px 22px -16px rgba(16,24,40,.6)}
+.t-row.soft{border-style:dashed;background:#fcfcfd}
+.t-ic{width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center;font-size:13px}
+.t-ic.red{background:var(--red-soft);color:var(--red)}
+.t-ic.amber{background:var(--amber-soft);color:var(--amber)}
+.t-ic.gray{background:#f2f4f8;color:#8b95a5}
+.t-main{flex:1;min-width:0}
+.t-main .n{font-size:13.4px;font-weight:600;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.t-main .d{font-size:12.4px;color:var(--muted);line-height:1.6}
+.t-main .why{font-size:11.5px;color:#98a2b0;margin-top:7px;display:flex;align-items:center;gap:6px}
+.t-main .why:before{content:"↳";color:#c3cbd8}
+.t-go{font-size:11.5px;color:var(--tone);flex:none;opacity:0;transform:translateX(-4px);transition:.18s;padding-top:3px}
+.t-row:hover .t-go{opacity:1;transform:none}
+.pill{font-size:10.5px;padding:1.5px 7px;border-radius:5px;font-weight:500;letter-spacing:.2px;flex:none}
+.pill.red{background:var(--red-soft);color:var(--red)}
+.pill.amber{background:var(--amber-soft);color:var(--amber)}
+.pill.green{background:var(--green-soft);color:var(--green)}
+.pill.gray{background:#f2f4f8;color:#6c7686}
+.pill.violet{background:#f2ecfd;color:#6d3fc4}
+
+/* table */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.8px}
+.tbl th{text-align:left;font-weight:500;font-size:10.5px;color:var(--faint);letter-spacing:.5px;padding:0 14px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.tbl tr.best td{background:linear-gradient(90deg,var(--tone-soft),transparent 70%)}
+.tbl tr.best td:first-child{box-shadow:inset 2px 0 0 var(--tone)}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--line-soft);color:var(--ink2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .r{text-align:right}
+.tbl .nm{font-weight:600;color:var(--ink)}
+.tbl .mo{font-size:11px;color:var(--faint);margin-top:2px}
+.tbl .lock{color:#b7bfcb;letter-spacing:2px}
+.bar-mini{display:inline-flex;align-items:center;gap:7px}
+.bar-mini i{display:block;height:4px;border-radius:4px;background:var(--tone);opacity:.55}
+.score{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+
+/* chart */
+.chart{position:relative;height:186px;margin:6px 2px 0;padding-bottom:2px}
+.chart .zero{position:absolute;left:0;right:0;border-top:1px dashed #dfe3ec;z-index:1}
+.chart .bars{display:flex;align-items:flex-end;gap:6px;height:100%;position:relative;z-index:2}
+.chart .col{flex:1;height:100%;position:relative}
+.chart .col .fill{position:absolute;left:0;right:0;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#9fb0d8,#c9d3e8);transition:height .6s cubic-bezier(.2,.7,.3,1);min-height:2px}
+.chart .col.neg .fill{background:linear-gradient(180deg,#e0857c,#c4392f);border-radius:0 0 5px 5px}
+.chart .col.hi .fill{background:linear-gradient(180deg,#c4392f,#8d251c);box-shadow:0 0 0 3px rgba(196,57,47,.12)}
+.chart .col .lb{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:#b3bac6;letter-spacing:-.2px}
+.chart-x{height:20px}
+.levers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.lever{padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;transition:.18s}
+.lever:hover{border-color:#cfd6e6;box-shadow:0 8px 22px -18px rgba(16,24,40,.6)}
+.lever .l{font-size:11px;color:var(--faint);margin-bottom:5px}
+.lever .v{font-size:16px;font-weight:650;letter-spacing:-.2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.lever .d{font-size:11px;color:#96a0af;margin-top:5px;line-height:1.5}
+
+/* flow */
+.flow{display:flex;align-items:stretch;padding:16px 2px 4px;overflow-x:auto}
+.node{flex:1;min-width:124px;position:relative;padding:0 8px}
+.node .line{position:absolute;top:15px;left:-9px;right:-9px;height:1px;background:var(--line);z-index:0}
+.node:first-child .line{display:none}
+.dot{
+  width:31px;height:31px;border-radius:10px;background:#fff;border:1px solid var(--line);
+  display:grid;place-items:center;position:relative;z-index:2;margin-bottom:9px;
+  font-size:11.5px;font-weight:600;color:#98a1b0;transition:.3s;
+}
+.node.done .dot{background:var(--green-soft);border-color:#c6e6d6;color:var(--green)}
+.node.now .dot{background:#fff;border-color:#e5c68a;color:var(--amber);box-shadow:0 0 0 5px rgba(217,154,43,.1);animation:pulse 2.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(217,154,43,.1)}50%{box-shadow:0 0 0 9px rgba(217,154,43,.02)}}
+.node .nm{font-size:12.2px;font-weight:600;color:var(--ink2);line-height:1.4}
+.node.todo .nm{color:#a2aab8;font-weight:500}
+.node .pn{font-size:10.5px;color:var(--faint);margin-top:2px}
+.node .st{font-size:10px;margin-top:6px;display:inline-block;padding:1.5px 6px;border-radius:5px}
+.st.done{background:var(--green-soft);color:var(--green)}
+.st.now{background:var(--amber-soft);color:var(--amber)}
+.st.todo{background:#f3f5f8;color:#9aa3b0}
+.st.auto{background:#eef2ff;color:#3a55c8}
+
+/* chain */
+.chain{display:flex;flex-direction:column;gap:0}
+.link{display:flex;gap:14px;position:relative;padding-bottom:10px}
+.link:last-child{padding-bottom:0}
+.link .rail-v{width:26px;flex:none;display:flex;flex-direction:column;align-items:center;position:relative}
+.link .rail-v:before{content:"";position:absolute;top:26px;bottom:-10px;width:1px;background:var(--line)}
+.link:last-child .rail-v:before{display:none}
+.link .num{
+  width:26px;height:26px;border-radius:9px;background:#fff;border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11px;color:#8b95a5;font-weight:600;z-index:1;
+}
+.link.hi .num{border-color:var(--tone-line);background:var(--tone-soft);color:var(--tone)}
+.link .bx{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:2px;transition:.2s}
+.link .bx:hover{border-color:#cfd6e6;box-shadow:0 8px 22px -18px rgba(16,24,40,.5)}
+.link .bx .hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.link .bx .t{font-size:12.6px;font-weight:600;color:var(--ink)}
+.link .bx .x{font-size:12px;color:var(--muted);line-height:1.6}
+.link .bx .x b{color:var(--ink);font-weight:600}
+.conf{display:flex;align-items:center;gap:7px;flex:none}
+.conf .bar{width:52px;height:4px;border-radius:4px;background:#eef0f5;overflow:hidden}
+.conf .bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#cdd6e8,#9fb0d8)}
+.conf.low .bar i{background:linear-gradient(90deg,#f2d39a,#d98f2b)}
+.conf.low span{color:#b8791f;font-weight:600}
+.conf span{font-size:10.5px;color:#98a2b0;font-variant-numeric:tabular-nums}
+
+/* guard */
+.g2{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:start}
+.alert{padding:16px 18px}
+.alert .h{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.alert .h .ic{width:26px;height:26px;border-radius:8px;background:var(--red-soft);color:var(--red);display:grid;place-items:center;font-size:13px}
+.alert .h b{font-size:13.5px}
+.alert .kv{display:grid;grid-template-columns:1fr 1fr;gap:11px 20px;margin:12px 0}
+.alert .kv .i .l{font-size:10.5px;color:var(--faint);margin-bottom:3px}
+.alert .kv .i .v{font-size:12.8px;color:var(--ink);font-weight:500}
+.alert .kv .i .v.red{color:var(--red)}
+.alert .note{font-size:11.5px;color:#96a0af;background:#fafbfd;border:1px solid var(--line-soft);border-radius:9px;padding:9px 11px;line-height:1.6}
+.perm{padding:16px 18px}
+.perm h4{margin:0 0 12px;font-size:12px;color:var(--ink2);font-weight:600}
+.perm .row{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);padding:6px 0;border-bottom:1px solid var(--line-soft)}
+.perm .row:last-child{border-bottom:0}
+.perm .row .r{flex:1}
+.perm .tag{font-size:10px;padding:1px 6px;border-radius:4px}
+.ok-tag{background:var(--green-soft);color:var(--green)}
+.no-tag{background:#f4f5f8;color:#a6afbd}
+
+/* diff */
+.delta{font-size:11px;padding:1.5px 6px;border-radius:5px;font-variant-numeric:tabular-nums}
+.delta.up{background:var(--green-soft);color:var(--green)}
+.delta.dn{background:var(--red-soft);color:var(--red)}
+.delta.flat{background:#f2f4f8;color:#8a93a3}
+.note-row{display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:12px;background:var(--tone-soft);border:1px solid var(--tone-line)}
+.note-row .ic{color:var(--tone);flex:none;margin-top:1px;font-size:13px}
+.note-row .tx{font-size:12.3px;color:var(--ink2);line-height:1.7}
+.note-row .tx b{color:var(--ink);font-weight:600}
+
+.act-row{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.act-btn{
+  height:36px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:#fff;
+  font-size:12.6px;font-weight:550;color:var(--ink2);transition:.16s;
+  display:inline-flex;align-items:center;gap:7px;
+}
+.act-btn:hover{border-color:#c3cbe0;background:#fafbff;color:var(--tone)}
+.act-btn.dark{background:#111827;border-color:#111827;color:#fff}
+.act-btn.dark:hover{background:#000;color:#fff;box-shadow:0 6px 18px -10px rgba(0,0,0,.8)}
+.act-btn.sign{background:var(--tone);border-color:var(--tone);color:#fff;position:relative}
+.act-btn.sign:hover{filter:brightness(1.06);color:#fff}
+.act-btn.sign.attention:after{
+  content:"";position:absolute;inset:-4px;border-radius:13px;border:1px solid var(--tone);
+  opacity:.45;animation:ring 1.8s infinite;
+}
+@keyframes ring{0%{transform:scale(.98);opacity:.5}100%{transform:scale(1.06);opacity:0}}
+
+.auto-done{margin-top:14px;border:1px dashed #d8dee9;border-radius:13px;padding:13px 16px;background:rgba(255,255,255,.62)}
+.auto-done .ad-h{font-size:11px;color:#98a2b0;letter-spacing:.4px;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.auto-done .ad-h:before{content:"";width:5px;height:5px;border-radius:50%;background:#31b06e}
+.ad-list{display:flex;flex-wrap:wrap;gap:7px}
+.ad-list span{font-size:12px;color:#5b6675;background:#fff;border:1px solid var(--line-soft);border-radius:7px;padding:5px 10px;display:inline-flex;align-items:center;gap:6px}
+.ad-list span:before{content:"✓";color:#31b06e;font-size:10px}
+
+/* cockpit */.cock{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.cock .c{
+  padding:15px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);
+  box-shadow:var(--shadow);transition:.2s;position:relative;overflow:hidden;
+}
+.cock .c:hover{transform:translateY(-2px);border-color:#cfd6e6;box-shadow:0 16px 34px -22px rgba(16,24,40,.7)}
+.cock .c .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:13px;margin-bottom:11px}
+.cock .c .t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:5px}
+.cock .c .d{font-size:11.5px;color:var(--muted);line-height:1.6}
+.cock .c .st{position:absolute;top:14px;right:14px;font-size:10px;padding:2px 7px;border-radius:5px;background:var(--green-soft);color:var(--green)}
+.cock .c.auto .st{background:#eef2ff;color:#3a55c8}
+.cock-foot{
+  margin-top:14px;padding:16px 18px;border-radius:14px;
+  background:linear-gradient(120deg,#12172a,#1f2a4d 60%,#26356b);color:#dfe6f6;
+  display:flex;align-items:center;gap:16px;
+}
+.cock-foot .big{font-size:15px;font-weight:600;letter-spacing:.2px;line-height:1.5}
+.cock-foot .sub{font-size:12px;color:#93a1c2;margin-top:4px;line-height:1.6}
+.cock-foot .sp{flex:1}
+.cock-foot .badge{font-size:11px;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);white-space:nowrap}
+
+/* drawer */
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:450px;background:#0e1117;color:#c8d3e4;
+  transform:translateX(101%);transition:transform .34s cubic-bezier(.3,.8,.3,1);z-index:70;
+  display:flex;flex-direction:column;box-shadow:-20px 0 60px -30px rgba(0,0,0,.6);
+}
+.drawer.open{transform:none}
+.drawer .dh{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #1c2230}
+.drawer .dh b{font-size:13px;color:#e6edf8;font-weight:600;letter-spacing:.2px}
+.drawer .dh span{font-size:11px;color:#5f6b7f;display:block;margin-top:2px}
+.drawer .x{width:26px;height:26px;border-radius:7px;border:1px solid #232b3a;color:#8b96a8;display:grid;place-items:center;font-size:12px}
+.drawer .x:hover{background:#1a2130;color:#fff}
+.drawer pre{flex:1;overflow:auto;margin:0;padding:16px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.4px;line-height:1.75;color:#9fb0c9;white-space:pre-wrap}
+.drawer pre .s{color:#7ee0a8}
+.drawer pre .k{color:#8fb8ff}
+.drawer pre .n{color:#f0b46b}
+.drawer .df{padding:12px 18px;border-top:1px solid #1c2230;font-size:11px;color:#5f6b7f;line-height:1.6}
+
+/* toast */
+.toast-wrap{position:fixed;bottom:118px;left:calc(394px + (100vw - 394px)/2);transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  background:#0f1420;color:#e8eef8;font-size:12.5px;padding:9px 15px;border-radius:10px;
+  box-shadow:0 12px 34px -14px rgba(0,0,0,.6);display:flex;align-items:center;gap:9px;
+  animation:tIn .32s cubic-bezier(.2,.7,.3,1) both;
+}
+.toast .tick{width:14px;height:14px;border-radius:50%;background:#2f9e6b;display:grid;place-items:center;flex:none;font-size:9px}
+@keyframes tIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media (max-width:1180px){
+  .chat{width:348px}
+  .g2{grid-template-columns:1fr}
+  .levers{grid-template-columns:1fr}
+  .cock{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  main{flex-direction:column}
+  .chat{width:100%;height:46%}
+  .canvas{border-top:1px solid var(--line)}
+  .ws{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark"></div>
+      <div><b>Nexus ERP</b> <span>· 一天的智能 · 自动演示</span></div>
+    </div>
+    <div class="ws" id="ws">
+      <span class="ws-label">今天固定的</span>
+      <span class="ws-empty" id="wsEmpty">还没有 —— 对话里固定的东西会沉淀到这里</span>
+    </div>
+    <div class="role" id="role">
+      <div class="av" id="roleAv">林</div>
+      <div class="tx"><b id="roleName">运营总监 林澈</b><span id="roleOrg">总部 · 运营中心</span></div>
+    </div>
+  </header>
+
+  <main>
+    <aside class="chat">
+      <div class="feed" id="feed"></div>
+      <div class="chatfoot">
+        <span class="live"><i></i>自动演示</span>
+        <span class="sp"></span>
+        <span class="kbd" id="actLabel">第 1 / 8 幕</span>
+      </div>
+    </aside>
+
+    <section class="canvas" id="canvas" data-tone="ops">
+      <div class="canvas-head">
+        <div class="intent">
+          <span class="tag" id="iTag">待机</span>
+          <span class="k">意图</span><span class="v" id="iIntent">—</span>
+          <span class="sep"></span>
+          <span class="k">视图</span><span class="v" id="iView">—</span>
+          <span class="sep"></span>
+          <span class="k">数据域</span><span class="v" id="iData">—</span>
+        </div>
+        <div class="tools">
+          <button id="specBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg>
+            视图规格
+          </button>
+          <button id="pinBtn" class="primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 17v5M9 3h6l-1 6 4 4H6l4-4z"/></svg>
+            固定到工作台
+          </button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage"></div>
+
+      <div class="player">
+        <button class="ic" id="pp" title="暂停 / 继续">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="7" y="5" width="3.4" height="14" rx="1"/><rect x="13.6" y="5" width="3.4" height="14" rx="1"/></svg>
+        </button>
+        <div class="sp"></div>
+        <div class="rail" id="rail"></div>
+        <div class="sp"></div>
+        <button class="spd" id="spd">1.0×</button>
+        <button class="ic" id="replay" title="重播">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 1 0 3-6.7L3 7"/><path d="M3 3v4h4"/></svg>
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="dh">
+    <div><b>视图规格</b><span>模型输出的不是像素，是一份声明式视图 + 受控动作</span></div>
+    <button class="x" id="drawerClose">✕</button>
+  </div>
+  <pre id="specCode"></pre>
+  <div class="df">渲染器只认识这些组件与动作白名单。模型画不出「转账」按钮，也绕不过权限与审计。</div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+/* ==========================================================
+   0. 工具
+   ========================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const el = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content.firstElementChild; };
+const feed = $('#feed'), stage = $('#stage'), canvas = $('#canvas'), rail = $('#rail');
+const sleepREAL = (ms) => new Promise(r => setTimeout(r, ms));
+
+const CTRL = { paused:false, speed:1, token:0 };
+let lastRun = 0;
+
+/* 可暂停 / 可变速 / 可中断的等待 */
+function wait(ms){
+  return new Promise(resolve => {
+    const my = CTRL.token;
+    let left = ms, last = performance.now();
+    const tick = () => {
+      if (my !== CTRL.token) return resolve();
+      const now = performance.now();
+      if (!CTRL.paused) left -= (now - last) * CTRL.speed;
+      last = now;
+      if (left <= 0) return resolve();
+      setTimeout(tick, 40);
+    };
+    tick();
+  });
+}
+
+const ai = (t) => t
+  .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+  .replace(/`([^`]+)`/g, '<code>$1</code>')
+  .replace(/\*\*/g, '');
+
+function scrollFeed(){ feed.scrollTop = feed.scrollHeight; }
+
+/* ==========================================================
+   1. 对话渲染
+   ========================================================== */
+function addDivider(text){
+  feed.appendChild(el(`<div class="divider"><span class="line"></span><span class="tx"><i></i>${text}<i></i></span><span class="line"></span></div>`));
+  scrollFeed();
+}
+
+function addUser(text){
+  const m = el(`<div class="msg me"><div class="body"></div></div>`);
+  m.querySelector('.body').textContent = text;
+  feed.appendChild(m); scrollFeed();
+}
+
+async function addBot(text, my, o = {}){
+  const m = el(`<div class="msg bot">
+    <div class="head"><span class="ai-dot"></span>助手</div>
+    <div class="body"></div>
+  </div>`);
+  feed.appendChild(m);
+  const body = m.querySelector('.body');
+  body.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+  scrollFeed();
+  await wait(380 + Math.min(text.length * 7, 620));
+  if (my !== CTRL.token) { body.innerHTML = ai(text); return m; }
+
+  body.innerHTML = '';
+  for (let n = 0; n < text.length; n += 3){
+    if (my !== CTRL.token) break;
+    body.innerHTML = ai(text.slice(0, n + 3));
+    scrollFeed();
+    await wait(15);
+  }
+  body.innerHTML = ai(text);
+  scrollFeed();
+
+  if (o.trace) addTrace(m, o.trace);
+  return m;
+}
+
+function addTrace(msgEl, lines){
+  const wrap = el(`<div class="trace"></div>`);
+  const sum = el(`<div class="sum">▸ 推理路径 · ${lines.length} 步</div>`);
+  sum.onclick = () => wrap.classList.remove('collapsed');
+  wrap.appendChild(sum);
+  lines.forEach((t, i) => {
+    const row = el(`<div class="tr" style="animation-delay:${i * 90}ms"></div>`);
+    row.textContent = t;
+    wrap.appendChild(row);
+  });
+  msgEl.appendChild(wrap);
+  setTimeout(() => { if (msgEl.isConnected) wrap.classList.add('collapsed'); }, 4200);
+}
+
+/* ==========================================================
+   2. 画布通用件
+   ========================================================== */
+function sHead(eyebrow, title, sub, meta = []){
+  return `<div class="s-head">
+    <div><div class="eyebrow">${eyebrow}</div><h2>${title}</h2><p class="sub">${sub}</p></div>
+    <div class="s-meta">${meta.map(x => `<div><b>${x.v}</b><span>${x.k}</span></div>`).join('')}</div>
+  </div>`;
+}
+const sFoot = (l, r) => `<div class="s-foot"><span>${l}</span><span>${r}</span></div>`;
+
+const META = {
+  brief:{ intent:'今天该处理什么', view:'待办简报', data:'审批 / 订单 / 定价' },
+  sourcing:{ intent:'缺料寻源决策', view:'比价矩阵', data:'供应商 / 协议 / 采购' },
+  cash:{ intent:'未来 14 天资金', view:'现金流曲线', data:'应收 / 应付 / 银行' },
+  approval:{ intent:'推进阻塞审批', view:'审批流', data:'审批中心 · PR-5512' },
+  yield:{ intent:'良率异常归因', view:'证据链', data:'MES / QMS / 设备 / PLM' },
+  guard:{ intent:'异常行为处置', view:'安全事件', data:'IAM / 日志 / 主数据' },
+  diff:{ intent:'毛利 vs 违约权衡', view:'变更提案', data:'订单 / 成本 / 合同' },
+  cockpit:{ intent:'今天的沉淀', view:'工作台', data:'全部域' },
+};
+
+function render(kind){
+  const html = VIEW[kind]();
+  const myTok = CTRL.token;
+  const old = stage.firstElementChild;
+  if (old){
+    old.style.transition = 'opacity .18s, transform .18s';
+    old.style.opacity = '0';
+    old.style.transform = 'translateY(-8px)';
+  }
+  setTimeout(() => {
+    if (myTok !== CTRL.token) return;
+    stage.innerHTML = '';
+    const node = el(`<div class="surface">${html}</div>`);
+    stage.appendChild(node);
+    stage.scrollTop = 0;
+    const m = META[kind];
+    $('#iIntent').textContent = m.intent;
+    $('#iView').textContent = m.view;
+    $('#iData').textContent = m.data;
+    $('#iTag').textContent = '生成中';
+    setTimeout(() => { if (kind === CUR.kind) $('#iTag').textContent = '已生成'; }, 620);
+    CUR = { kind, html };
+    node.querySelectorAll('.s-meta b, .lever .v, .alert .kv .v, .big-num').forEach(countUp);
+  }, old ? 190 : 0);
+}
+
+let CUR = { kind:null, html:'' };
+
+const REDUCED = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function countUp(node){
+  if (REDUCED) return;
+  const raw = node.textContent.trim();
+  if (/\d:\d/.test(raw)) return;                                   // 时刻不做滚动
+  if ((raw.match(/\./g) || []).length > 1) return;                 // IP / 版本号
+  const m = raw.match(/^(.*?)(-?[\d,]+(?:\.\d+)?)(\D*)$/);
+  if (!m) return;
+  const pre = m[1], suf = m[3];
+  const target = parseFloat(m[2].replace(/,/g, ''));
+  if (!isFinite(target) || target === 0) return;
+  const dec = (m[2].split('.')[1] || '').length;
+  const t0 = performance.now(), dur = 720;
+  const step = (t) => {
+    const k = Math.max(0, Math.min(1, (t - t0) / dur));
+    const e = 1 - Math.pow(1 - k, 3);
+    node.textContent = pre + (target * e).toFixed(dec) + suf;
+    if (k < 1) requestAnimationFrame(step); else node.textContent = raw;
+  };
+  requestAnimationFrame(step);
+}
+
+/* ==========================================================
+   3. 八个视图
+   ========================================================== */
+const VIEW = {
+
+  /* 01 晨间简报 */
+  brief(){
+    const rows = [
+      { c:'red', ic:'!', n:'采购审批超时', p:'<span class="pill red">超时 6h</span>',
+        d:'PR-5512 · 供应商宏远精密 · ¥486,000 · 压着 SO-2041（¥1.62M）',
+        w:'罚则 ¥32,400 / 周，且只有你有越级权限' },
+      { c:'amber', ic:'▲', n:'交付风险', p:'<span class="pill amber">剩 2 天</span>',
+        d:'SO-2041 华东仓缺料 1,200 pcs MOSFET 驱动 IC',
+        w:'客户已把交期从 11-22 提前到 11-20' },
+      { c:'gray', ic:'?', n:'价格例外', p:'<span class="pill gray">不做判断</span>',
+        d:'华南经销商报价低于底价 4.2%，需要渠道政策口径',
+        w:'模型给不出建议 —— 这类事留给你' },
+    ];
+    return sHead('08:12 · 晨间 · 全量扫描', '今天需要你决定的事',
+      '三条里只有一条真的超时。其余两条我按「可以等」处理了。',
+      [{v:'3',k:'待处理'},{v:'1',k:'已超时'},{v:'¥1.62M',k:'受影响订单'}])
+    + `<div class="todo">${rows.map((r, i) => `
+      <div class="t-row ${r.c === 'gray' ? 'soft' : ''}" style="animation-delay:${i * 70}ms">
+        <div class="t-ic ${r.c}">${r.ic}</div>
+        <div class="t-main">
+          <div class="n">${r.n} ${r.p}</div>
+          <div class="d">${r.d}</div>
+          <div class="why">${r.w}</div>
+        </div>
+        <span class="t-go">展开 →</span>
+      </div>`).join('')}</div>
+    <div class="auto-done">
+      <div class="ad-h">已经替你处理完 · 不需要你看</div>
+      <div class="ad-list">
+        <span>47 张报销单自动过账</span>
+        <span>12 条批量逾期提醒已发</span>
+        <span>下周排产草案已生成</span>
+        <span>3 家供应商证照续期</span>
+        <span>2 笔对账差异自动匹配</span>
+      </div>
+    </div>`
+    + sFoot('数据来源 · 审批中心 / 订单域 / 定价规则 · 实时', '生成于 08:12');
+  },
+
+  /* 02 寻源比价 */
+  sourcing(){
+    const rows = [
+      { n:'宏远精密', mo:'框架协议 · 合作 3 年', p:'¥0.86', t:'48h', a:'60 天', q:'0.8%', s:86, w:78, best:true, tag:'<span class="pill green">推荐</span>' },
+      { n:'鸿达电子', mo:'框架协议 · 合作 1 年', p:'¥0.82', t:'96h', a:'30 天', q:'2.3%', s:71, w:62, tag:'<span class="pill amber">交期不足</span>' },
+      { n:'瑞芯微代', mo:'协议外 · 需走例外', p:'¥0.91', t:'24h', a:'45 天', q:'0.2%', s:79, w:71, tag:'<span class="pill gray">协议外</span>' },
+    ];
+    return sHead('08:26 · 采购中心 · 缺料寻源', 'MOSFET 驱动 IC · 1,200 pcs',
+      '三家能满足规格，只有一家同时满足交期与协议价。',
+      [{v:'3',k:'候选供应商'},{v:'48h',k:'最短到料'},{v:'86',k:'最优综合分'}])
+    + `<div class="card" style="padding:18px 10px 6px">
+      <table class="tbl">
+        <thead><tr>
+          <th>供应商</th><th class="r">单价</th><th class="r">交期</th><th class="r">账期</th>
+          <th class="r">历史不良</th><th class="r">综合</th><th class="r">结论</th>
+        </tr></thead>
+        <tbody>${rows.map(r => `<tr class="${r.best ? 'best' : ''}">
+          <td><div class="nm">${r.n}</div><div class="mo">${r.mo}</div></td>
+          <td class="r">${r.p}</td><td class="r">${r.t}</td><td class="r">${r.a}</td>
+          <td class="r">${r.q}</td>
+          <td class="r"><span class="bar-mini"><i style="width:${r.s / 2}px"></i><span class="score">${r.s}</span></span></td>
+          <td class="r">${r.tag}</td>
+        </tr>`).join('')}
+        <tr>
+          <td><div class="nm" style="color:#b7bfcb">成本卡 · 目标价</div><div class="mo">需财务授权</div></td>
+          <td class="r lock" colspan="6">██████ 无权限 ██████</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note-row" style="margin-top:12px">
+      <span class="ic">◆</span>
+      <div class="tx"><b>为什么是宏远：</b>贵 4 分钱，但它是唯一同时在协议内、且能在 11-22 前到料的。
+      鸿达更便宜，交期 96 小时 —— 赶不上的便宜是假便宜。</div>
+    </div>
+    <div class="act-row">
+      <button class="act-btn dark">生成采购订单草稿</button>
+      <button class="act-btn">发比价单让第四家也报</button>
+    </div>`
+    + sFoot('比价口径 · 公开报价 + 历史成交价（成本卡无权限）', '生成于 08:26');
+  },
+
+  /* 03 现金流 */
+  cash(){
+    const open = 3200;
+    const nets = [-680, 140, -1240, 960, -310, -1480, 90, -210, -790, 1260, -60, 2400, -120, 380];
+    let bal = open;
+    const series = nets.map(n => (bal += n));
+    const maxV = 3600, minV = 400;
+    const Z = 20;                 // 零线距底部 20%
+    const UP = 100 - Z;           // 零线以上可用 80%
+    const bars = series.map((v, i) => {
+      const neg = v < 0;
+      const h = neg ? Math.abs(v) / minV * Z : v / maxV * UP;
+      const d = new Date(2026, 10, 21 + i);
+      const lb = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return `<div class="col ${neg ? 'neg' : ''} ${i === 8 ? 'hi' : ''}">
+        <div class="fill" style="height:${h.toFixed(1)}%;${neg ? `top:${UP}%` : `bottom:${Z}%`}"></div>
+        <span class="lb">${lb.slice(3)}</span>
+      </div>`;
+    }).join('');
+
+    return sHead('09:03 · 财务中心 · 资金计划', '未来 14 天现金流',
+      '第 9 天有个 320 万的缺口，但可以用三笔付款的时点补上。',
+      [{v:'-320',k:'最低点（万）'},{v:'3',k:'可用杠杆'},{v:'4.2',k:'调度成本（万）'}])
+    + `<div class="card" style="padding:18px 18px 6px">
+        <div class="chart">
+          <div class="zero" style="bottom:${Z}%"></div>
+          <div class="bars">${bars}</div>
+        </div>
+        <div class="chart-x"></div>
+        <div style="display:flex;gap:18px;font-size:11px;color:#a6b0c0;padding:4px 0 12px">
+          <span>期初 3,200 万</span><span>·</span><span style="color:var(--red)">最低 -320 万（11-29）</span>
+          <span>·</span><span>期末 3,540 万</span>
+        </div>
+      </div>
+      <div class="levers">
+        <div class="lever"><div class="l">杠杆 A · 三笔付款延后 4 天</div><div class="v">+1,180 万</div><div class="d">成本 4.2 万 · 供应商均在宽限期内</div></div>
+        <div class="lever"><div class="l">杠杆 B · 加速两笔应收</div><div class="v">+860 万</div><div class="d">需销售配合 · 历史回款率 61%</div></div>
+        <div class="lever"><div class="l">杠杆 C · 短期授信</div><div class="v">+500 万</div><div class="d">利率 3.65% · 不占用现金流</div></div>
+      </div>
+      <div class="note-row" style="margin-top:12px">
+        <span class="ic">◆</span>
+        <div class="tx"><b>建议组合 A：</b>延后 + 加速，成本 4.2 万，不动授信额度。
+        授信是留给「突然要用钱」的那一天，不是用来补计划内的缺口。</div>
+      </div>`
+    + sFoot('口径 · 已确认订单的应收应付 · 不含未签约 · 截止 09:03', '生成于 09:03');
+  },
+
+  /* 04 审批流 */
+  approval(){
+    const nodes = [
+      { n:'提交申请', p:'李维 · 采购', s:'done', t:'已通过', auto:true },
+      { n:'部门审批', p:'王岚 · 供应链', s:'done', t:'已通过', auto:true },
+      { n:'财务 BP', p:'张宁 · 财务', s:'now', t:'待处理 · 已 15 天' },
+      { n:'总监审批', p:'你', s:'todo', t:'未开始' },
+      { n:'自动下单', p:'系统', s:'todo', t:'—' },
+    ];
+    return sHead('09:41 · 跨部门 · PR-5512', 'PR-5512 采购审批',
+      '前两环由规则引擎自动通过。卡在第三环 —— 但问题不在流程。',
+      [{v:'15',k:'已等待天数'},{v:'¥486k',k:'申请金额'},{v:'2',k:'自动通过环节'}])
+    + `<div class="card" style="padding:10px 14px 18px">
+        <div class="flow">${nodes.map((x, i) => `
+          <div class="node ${x.s}">
+            ${i ? '<span class="line"></span>' : ''}
+            <div class="dot">${x.s === 'done' ? '✓' : x.s === 'now' ? '⋯' : i + 1}</div>
+            <div class="nm">${x.n}</div>
+            <div class="pn">${x.p}</div>
+            <span class="st ${x.auto ? 'auto' : x.s}">${x.auto ? '规则自动' : x.t}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px;padding:16px 18px">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+          <span class="pill green">✓ 催办已送达</span>
+          <span style="font-size:11.5px;color:#98a2b0">附带了 3 份上下文，不是一句「在吗」</span>
+        </div>
+        <div style="font-size:12.4px;color:var(--ink2);line-height:1.85">
+          · 罚则敞口：逾期每周 ¥32,400，已累计 2 周<br>
+          · 替代方案：瑞芯微代可 24h 到料，单价 +5.8%（协议外）<br>
+          · 今天批 → 回款提前 9 天，正好补上 11-29 的缺口
+        </div>
+      </div>
+      <div class="act-row">
+        <button class="act-btn dark">查看完整审批记录</button>
+        <button class="act-btn">越级放行（会留痕）</button>
+      </div>`
+    + sFoot('权限 · 你是该单最终审批人，可越级；越级将写入不可删除的审计日志', '生成于 09:41');
+  },
+
+  /* 05 良率归因 */
+  yield(){
+    const links = [
+      { t:'现象 · 良率下滑', x:'SO-2036 近 3 日良率 <b>91.2%</b>，较前 30 天均值低 4.1 个点', c:100, n:'2,100 张工单' },
+      { t:'批次定位', x:'不良集中在批次 <b>M-1103</b>（11-08 ~ 11-10），占比 78%', c:92, n:'148 条不良' },
+      { t:'设备关联', x:'A7 回流焊温控 <b>+6.4℃</b> 漂移，时间窗与不良高度重合', c:88, n:'12 台设备' },
+      { t:'根因假设', x:'工艺参数表 <b>v3.2</b> 未同步到 A7，仍在跑 v3.1 的温区曲线', c:74, n:'需现场确认' },
+    ];
+    return sHead('14:20 · 制造中心 · 良率异常', 'SO-2036 良率归因',
+      '不是供应商的问题，是设备参数。最后一环只有 74% 置信度 —— 需要现场确认。',
+      [{v:'91.2%',k:'当前良率'},{v:'-4.1pt',k:'较基线'},{v:'420',k:'待复检件数'}])
+    + `<div class="card" style="padding:18px 20px">
+        <div class="chain">${links.map((l, i) => `
+          <div class="link ${i === 3 ? 'hi' : ''}">
+            <div class="rail-v"><div class="num">${i + 1}</div></div>
+            <div class="bx">
+              <div class="hd">
+                <div class="t">${l.t}</div>
+                <div class="conf ${l.c < 80 ? 'low' : ''}"><div class="bar"><i style="width:${l.c}%"></i></div><span>${l.c}%</span></div>
+              </div>
+              <div class="x">${l.x}</div>
+              <div style="font-size:10.5px;color:#b3bac6;margin-top:6px">证据 · ${l.n}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="g2" style="margin-top:12px">
+        <div class="card" style="padding:16px 18px">
+          <div style="font-size:11px;color:var(--faint);margin-bottom:8px">建议动作</div>
+          <div style="font-size:12.6px;color:var(--ink2);line-height:1.9">
+            ① 暂停 A7 进料，切换 A5 备线<br>
+            ② 回滚参数表至 v3.1 并全量校验<br>
+            ③ 复检 M-1103 批次在制 420 件
+          </div>
+        </div>
+        <div class="card" style="padding:16px 18px">
+          <div style="font-size:11px;color:var(--faint);margin-bottom:8px">影响面</div>
+          <div style="font-size:12.6px;color:var(--ink2);line-height:1.9">
+            3 张在制订单 · 停线 4 小时<br>
+            产能损失约 <b>¥86,000</b><br>
+            若不放行，预计再产生 260 件不良
+          </div>
+        </div>
+      </div>
+      <div class="act-row">
+        <button class="act-btn dark">生成工单（等你签字）</button>
+        <button class="act-btn">先要现场照片</button>
+      </div>`
+    + sFoot('归因链路 · MES / QMS / 设备台账 / PLM 参数版本', '生成于 14:20');
+  },
+
+  /* 06 安全事件 */
+  guard(){
+    return sHead('16:05 · 数字化中心 · 安全巡检', '今天只有一条异常',
+      '不是规则报警，是行为基线偏移 —— 这种它以前不会报。',
+      [{v:'1',k:'异常事件'},{v:'8,412',k:'导出条数'},{v:'3',k:'受影响接口'}])
+    + `<div class="g2">
+      <div class="card alert">
+        <div class="h"><span class="ic">!</span><b>账号 <code>crm_liyang</code> · 批量导出</b></div>
+        <div class="kv">
+          <div class="i"><div class="l">发生时间</div><div class="v red">02:14:08</div></div>
+          <div class="i"><div class="l">导出对象</div><div class="v">客户主数据 · 8,412 条</div></div>
+          <div class="i"><div class="l">来源 IP</div><div class="v red">新加坡 · 203.0.113.44</div></div>
+          <div class="i"><div class="l">常驻地</div><div class="v">苏州（近 90 天 100%）</div></div>
+          <div class="i"><div class="l">偏离基线</div><div class="v red">3.2 σ</div></div>
+          <div class="i"><div class="l">同期权限变更</div><div class="v">无</div></div>
+        </div>
+        <div class="note">规则告警只覆盖「已定义的危险动作」。这条异常来自行为基线 —— 它没做任何违规的事，只是做了一件它从不做的事。</div>
+        <div class="act-row">
+          <button class="act-btn dark">立即冻结 + 通知 DPO</button>
+          <button class="act-btn">仅告警，持续观察</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card perm">
+          <h4>处置影响面 · 已预演</h4>
+          <div class="row"><span class="r">下游接口 3 个</span><span class="tag ok-tag">降级开关就绪</span></div>
+          <div class="row"><span class="r">在途任务 0 个</span><span class="tag ok-tag">无阻塞</span></div>
+          <div class="row"><span class="r">业务影响</span><span class="tag ok-tag">可接受</span></div>
+        </div>
+        <div class="card perm">
+          <h4>权限快照 · 该角色</h4>
+          <div class="row"><span class="r">客户主数据 · 读</span><span class="tag ok-tag">有</span></div>
+          <div class="row"><span class="r">客户主数据 · 导出</span><span class="tag ok-tag">有</span></div>
+          <div class="row"><span class="r">批量导出 · 脱敏</span><span class="tag no-tag">跳过</span></div>
+          <div class="row"><span class="r">导出审计 · 留痕</span><span class="tag ok-tag">完整</span></div>
+        </div>
+      </div>
+    </div>`
+    + sFoot('取证在前、处置在后 · 证据包已生成（哈希存证）', '生成于 16:05');
+  },
+
+  /* 07 变更提案 */
+  diff(){
+    const rows = [
+      { id:'SO-2036', cu:'恒睿医疗', gm:'38.2%', old:3, neu:1, d:'+35.2%', dir:'up' },
+      { id:'SO-2041', cu:'瑞恒电子', gm:'29.4%', old:1, neu:2, d:'—', dir:'flat' },
+      { id:'SO-2028', cu:'瑞恒电子', gm:'34.1%', old:2, neu:3, d:'-4.1%', dir:'dn' },
+    ];
+    return sHead('17:30 · 运营中心 · 决策模拟', '按毛利率重排的提案',
+      '模型算得出钱，算不出客户的分量。所以它只提案，不执行。',
+      [{v:'+9.1pt',k:'综合毛利'},{v:'¥32,400',k:'新增罚金'},{v:'1',k:'需你签字'}])
+    + `<div class="card" style="padding:18px 10px 6px">
+      <table class="tbl">
+        <thead><tr><th>订单</th><th>客户</th><th class="r">毛利率</th><th class="r">原优先级</th><th class="r">新优先级</th><th class="r">变化</th></tr></thead>
+        <tbody>${rows.map(r => `<tr>
+          <td><span style="font-variant-numeric:tabular-nums;font-size:12px;color:#9aa3b0">${r.id}</span></td>
+          <td>${r.cu}</td>
+          <td class="r" style="font-weight:600;color:#0d1117;font-variant-numeric:tabular-nums">${r.gm}</td>
+          <td class="r" style="color:#9aa3b0">#${r.old}</td>
+          <td class="r" style="font-weight:600">#${r.neu}</td>
+          <td class="r"><span class="delta ${r.dir}">${r.dir === 'up' ? '▲ ' : r.dir === 'dn' ? '▼ ' : ''}${r.d}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="note-row" style="margin-top:12px">
+      <span class="ic">◆</span>
+      <div class="tx"><b>这笔账不只在毛利上。</b> SO-2041 是瑞恒电子的单，他们占我们 Q1 营收 23%。
+      顺延 2 天省下 9.1 个点的毛利，可能换掉一个续约。这属于模型看不见的变量。</div>
+    </div>
+    <div class="act-row">
+      <button class="act-btn sign attention">以我的名义签字执行</button>
+      <button class="act-btn">冻结为提案，周一复盘</button>
+    </div>`
+    + sFoot('口径 · (售价 − 标准成本) / 售价 · 成本截止 11-20 08:00', '生成于 17:30');
+  },
+
+  /* 08 工作台 */
+  cockpit(){
+    const cards = [
+      { ic:'☀', bg:'#eef1ff', c:'#2f4fd8', t:'晨间简报', d:'3 条待办 · 每天 08:00 自动生成', s:'已固化', auto:true },
+      { ic:'◈', bg:'#fdf4e7', c:'#a8620f', t:'缺料寻源', d:'3 家供应商比价模板 · 触发式', s:'已固化', auto:true },
+      { ic:'◷', bg:'#e9f6f0', c:'#187a52', t:'现金流 14 天', d:'每天 09:00 · 缺口自动预警', s:'已固化', auto:true },
+      { ic:'✓', bg:'#f2ecfd', c:'#6d3fc4', t:'良率证据链', d:'异常触发 · 置信度 < 80% 转人工', s:'已固化', auto:true },
+    ];
+    return sHead('18:00 · 一天结束', '你今天留下了什么',
+      '6 个决定，4 个变成了固定入口。界面没有变多，是因为它记住了。',
+      [{v:'6',k:'今天的决定'},{v:'4',k:'固化入口'},{v:'26',k:'你说过的话'}])
+    + `<div class="cock">${cards.map((c, i) => `
+        <div class="c ${c.auto ? 'auto' : ''}" style="animation:rise .45s ${i * 70}ms both">
+          <span class="st">${c.s}</span>
+          <div class="ic" style="background:${c.bg};color:${c.c}">${c.ic}</div>
+          <div class="t">${c.t}</div>
+          <div class="d">${c.d}</div>
+        </div>`).join('')}</div>
+      <div class="cock-foot">
+        <div>
+          <div class="big">下周一 08:00，这份简报会自己出现在这里</div>
+          <div class="sub">你不需要再问一次「今天有什么要我处理的」。</div>
+        </div>
+        <div class="sp"></div>
+        <div class="badge">已排程 · 推送到企业微信</div>
+      </div>`
+    + sFoot('沉淀 · 对话 → 视图 → 入口 · 全部可审计', '生成于 18:00');
+  }
+};
+
+/* ==========================================================
+   4. 角色 / 色调 / 固定 / 提示
+   ========================================================== */
+function setRole(r){
+  $('#roleAv').textContent = r.av;
+  $('#roleName').textContent = r.name;
+  $('#roleOrg').textContent = r.org;
+  $('#roleAv').style.background = r.color;
+  const box = $('#role');
+  box.classList.remove('swap');
+  void box.offsetWidth;
+  box.classList.add('swap');
+}
+
+function setTone(t){ canvas.dataset.tone = t; }
+
+function pinCurrent(name){
+  const ws = $('#ws');
+  const e = $('#wsEmpty'); if (e) e.remove();
+  const chip = el(`<button class="chip new"><span class="dot"></span>${name}</button>`);
+  ws.appendChild(chip);
+  setTimeout(() => chip.classList.remove('new'), 1500);
+}
+
+function toast(msg){
+  const t = el(`<div class="toast"><span class="tick">✓</span>${msg}</div>`);
+  $('#toasts').appendChild(t);
+  setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 320); }, 2400);
+}
+
+/* ==========================================================
+   5. 剧本
+   ========================================================== */
+const ACTS = [
+  {
+    no:1, tone:'ops',
+    role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
+    line:'08:12 · 运营总监 林澈 · 总部',
+    pin:'晨间简报',
+    run: async (h) => {
+      await h.me('今天有什么要我处理的？');
+      await h.say('三条。**只有一条真的超时** —— 另外两条还有缓冲，可以等。\n\n超时的那条压着一张 ¥1.62M 的订单，罚则 ¥32,400 / 周。',
+        { trace:['读取审批中心 · 12 条待办', '关联订单域 · 3 条风险', '按影响面 × 剩余时间排序'] });
+      await h.show('brief');
+      await h.hold(2600);
+      await h.say('第三条我不做判断。它涉及渠道政策，模型给不出建议 —— 这类事留给你，不瞎猜。');
+      await h.pin();
+    }
+  },
+  {
+    no:2, tone:'buy',
+    role:{ av:'周', name:'采购员 周野', org:'采购中心 · 结构件组', color:'#b5762a' },
+    line:'08:26 · 视角切到 采购中心',
+    pin:'缺料寻源',
+    run: async (h) => {
+      await h.me('PR-5512 这颗料能今天定吗？');
+      await h.say('三家能给到 48 小时，但只有一家同时满足**协议价**和**账期**。\n\n先说清楚：成本卡我没权限调，这次比价只用公开报价和历史成交价。',
+        { trace:['框架协议 · 4 家合格供应商', '历史成交价 · 17 笔', '交期约束 · 48h 内到料'] });
+      await h.show('sourcing');
+      await h.hold(2600);
+      await h.me('那就定宏远。');
+      await h.say('草稿已生成：PO-8841，1,200 pcs，单价上浮 3.1% —— 仍在协议 5% 弹性内，不用惊动上级。\n\n**越权的事我不做，边界内的事你不用管。**');
+      await h.hold(1200);
+      await h.pin();
+    }
+  },
+  {
+    no:3, tone:'fin',
+    role:{ av:'张', name:'财务 BP 张宁', org:'财务中心 · 资金', color:'#187a52' },
+    line:'09:03 · 视角切到 财务中心',
+    pin:'现金流 14 天',
+    run: async (h) => {
+      await h.me('未来两周现金有缺口吗？');
+      await h.say('第 9 天有个 **320 万** 的缺口。\n\n挪三笔付款 4 天，成本 4.2 万；或者等两笔应收 —— 但它们历史回款率只有 61%，我不建议押这个。',
+        { trace:['应收 · 38 笔', '应付 · 52 笔', '银行账户 · 6 个', '滚动 14 天预测'] });
+      await h.show('cash');
+      await h.hold(2800);
+      await h.me('那先把宏远的付了，剩下的往后挪。');
+      await h.say('挪好了。4.2 万的成本挂在「资金调度」科目下。\n\n还有件事：**PR-5512 压在我这儿不是忘了**，它这两天在跟现金流打架。今天下午我会处理。');
+      await h.hold(1400);
+      await h.pin();
+    }
+  },
+  {
+    no:4, tone:'dec',
+    role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
+    line:'09:41 · 回到 运营中心',
+    pin:null,
+    run: async (h) => {
+      await h.say('她卡了你 15 天，不一定是因为流程慢 —— 她手上有一个 320 万的缺口。\n\n催办之前，也许该先问一句「你是不是在忙别的」。');
+      await h.show('approval');
+      await h.hold(1400);
+      await h.me('不越级。帮我把信息递过去，让她能快速判断。');
+      await h.say('递了。附了三样东西：罚则敞口、替代方案、以及「今天批，回款能提前 9 天」。\n\n**卡点信息比催促本身有用。**',
+        { trace:['读取该单上下文 · 6 项', '生成 3 段决策摘要', '推送至财务 BP 工作台'] });
+      await h.hold(2400);
+      await h.me('你不是有越级权限吗？为什么不直接用。');
+      await h.say('有。但越级会在审计日志里留一条永久的标记，而这件事的根因不在流程，在信息。\n\n**能绕过流程，不等于应该绕过。**');
+      await h.hold(600);
+    }
+  },
+  {
+    no:5, tone:'qms',
+    role:{ av:'陈', name:'质量工程师 陈默', org:'制造中心 · 质量管理', color:'#6d3fc4' },
+    line:'14:20 · 视角切到 制造中心',
+    pin:'良率证据链',
+    run: async (h) => {
+      await h.me('SO-2036 良率掉到 91%，帮我看看是哪的问题。');
+      await h.say('不是供应商的问题，是设备。\n\n证据链在右边，每一环都标了置信度 —— 最后一环只有 **74%**，需要现场确认。',
+        { trace:['MES 工单 · 2,100 条', 'QMS 不良记录 · 148 条', '设备台账 · 12 台', 'PLM 参数版本 · 3 个'] });
+      await h.show('yield');
+      await h.hold(3000);
+      await h.me('影响多大？');
+      await h.say('3 张在制订单、420 件待复检。校准会让 A7 停线 **4 小时**，产能损失约 ¥86,000。\n\n工单我可以直接开，但停线这个决定 —— 我给建议，你签字。');
+      await h.hold(1000);
+      await h.pin();
+    }
+  },
+  {
+    no:6, tone:'gov',
+    role:{ av:'沈', name:'系统管理员 沈屿', org:'数字化中心 · 平台', color:'#b03434' },
+    line:'16:05 · 视角切到 数字化中心',
+    pin:null,
+    run: async (h) => {
+      await h.me('今天有异常吗？');
+      await h.say('一条。`crm_liyang` 在 02:14 导出了 **8,412 条**客户主数据，超出它日常 3.2 个标准差，IP 在新加坡 —— 这个账号近 90 天都在苏州。',
+        { trace:['登录日志 · 41,206 条', '导出行为基线 · 30 天', '权限变更 · 6 条', 'IP 归属地比对'] });
+      await h.show('guard');
+      await h.hold(2800);
+      await h.me('冻结，同时通知 DPO。');
+      await h.say('冻结了。DPO 收到带证据包的工单，下游 3 个接口已切到降级开关，业务无感。\n\n**取证在前、处置在后** —— 顺序反了，就追不回来了。');
+      await h.hold(1200);
+    }
+  },
+  {
+    no:7, tone:'dec',
+    role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
+    line:'17:30 · 回到 运营中心',
+    pin:null,
+    run: async (h) => {
+      await h.me('排产要不要为了毛利调一下？');
+      await h.say('能多 **9.1 个点** 综合毛利。代价是 SO-2041 顺延 2 天，¥32,400 罚金 —— 而且那是瑞恒电子，我们 Q1 最大的客户。\n\n模型算得出钱，算不出这张脸。',
+        { trace:['订单毛利 · 24 张', '违约条款 · 9 条', '客户分级 · 4 档', '模拟 3 种排产方案'] });
+      await h.show('diff');
+      await h.hold(2900);
+      await h.me('冻结。我不签。');
+      await h.say('冻结了，提案留到周一复盘。\n\n签字这件事我不替你做 —— **它是我今天唯一没帮你省掉的动作**。');
+      await h.hold(1000);
+    }
+  },
+  {
+    no:8, tone:'ops',
+    role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
+    line:'18:00 · 同一个人 · 明天早上',
+    pin:null,
+    run: async (h) => {
+      await h.show('cockpit');
+      await h.say('今天你做了 6 个决定，其中 4 个我已经做成了固定入口。',
+        { trace:['汇总今日会话 · 26 轮', '提取可复用路径 · 4 条', '注册为自动化任务'] });
+      await h.hold(3600);
+      await h.say('下周一 08:00，这份简报会自己出现在这里 —— 你不用再问一次。\n\n**界面没有变多，是因为它记住了。**');
+      await h.hold(1200);
+    }
+  }
+];
+
+/* ==========================================================
+   6. 播放器
+   ========================================================== */
+function mkHelpers(my){
+  const alive = () => my === CTRL.token;
+  return {
+    me: async (t) => { if (!alive()) return; await wait(500); if (!alive()) return; addUser(t); await wait(620); },
+    say: async (t, o = {}) => { if (!alive()) return; await wait(o.delay ?? 520); if (!alive()) return; await addBot(t, my, o); },
+    show: async (k) => { if (!alive()) return; await wait(420); if (!alive()) return; render(k); },
+    hold: async (ms) => { if (!alive()) return; await wait(ms); },
+    pin: async () => {
+      if (!alive()) return;
+      const act = ACTS[CUR_ACT];
+      if (!act.pin) return;
+      await wait(700); if (!alive()) return;
+      pinCurrent(act.pin);
+      toast(`已固定「${act.pin}」到工作台`);
+    }
+  };
+}
+
+let CUR_ACT = 0;
+
+function buildRail(){
+  rail.innerHTML = '';
+  ACTS.forEach((a, i) => {
+    const n = el(`<div class="n" title="${a.role.name} · ${a.line}">${String(a.no).padStart(2, '0')}</div>`);
+    n.onclick = () => start(i);
+    rail.appendChild(n);
+  });
+}
+function markRail(i){
+  [...rail.children].forEach((n, j) => {
+    n.className = 'n' + (j < i ? ' done' : j === i ? ' now' : '');
+  });
+  $('#actLabel').textContent = `第 ${i + 1} / ${ACTS.length} 幕`;
+}
+
+function resetAll(){
+  feed.innerHTML = '';
+  stage.innerHTML = '';
+  $('#ws').querySelectorAll('.chip').forEach(c => c.remove());
+  const empty = $('#wsEmpty');
+  if (empty) empty.style.display = '';
+  CUR = { kind:null, html:'' };
+  $('#iTag').textContent = '待机';
+  $('#iIntent').textContent = '—';
+  $('#iView').textContent = '—';
+  $('#iData').textContent = '—';
+}
+
+async function start(from = 0){
+  CTRL.token++;
+  const my = CTRL.token;
+  CTRL.paused = false;
+  syncPlayBtn();
+  resetAll();
+
+  // 跳到某一幕时，把之前的固定入口一次性补上
+  for (let i = 0; i < from; i++) if (ACTS[i].pin) pinCurrent(ACTS[i].pin);
+
+  for (let i = from; i < ACTS.length; i++){
+    if (my !== CTRL.token) return;
+    CUR_ACT = i;
+    const act = ACTS[i];
+    setRole(act.role);
+    setTone(act.tone);
+    markRail(i);
+    await sleepREAL(420);
+    if (my !== CTRL.token) return;
+    addDivider(act.line);
+    await sleepREAL(620);
+    if (my !== CTRL.token) return;
+    await act.run(mkHelpers(my));
+    if (my !== CTRL.token) return;
+    await sleepREAL(260);
+  }
+  if (my === CTRL.token) finish();
+}
+
+function finish(){
+  markRail(ACTS.length - 1);
+  [...rail.children].forEach(n => n.classList.add('done'));
+  [...rail.children].forEach(n => n.classList.remove('now'));
+  $('#actLabel').textContent = '演示结束';
+  const last = el(`<div class="finish" style="margin:10px 0 6px;display:flex;align-items:center;gap:10px;font-size:11.5px;color:#9aa3b0">
+    <span style="width:5px;height:5px;border-radius:50%;background:#2f9e6b"></span>演示结束 · 点右下角 ↻ 重播，或点进度条跳到任意一幕
+  </div>`);
+  feed.appendChild(last);
+  scrollFeed();
+}
+
+function syncPlayBtn(){
+  const icon = CTRL.paused
+    ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M8 5l12 7-12 7z"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="7" y="5" width="3.4" height="14" rx="1"/><rect x="13.6" y="5" width="3.4" height="14" rx="1"/></svg>';
+  $('#pp').innerHTML = icon;
+}
+
+/* 控件 */
+$('#pp').onclick = () => { CTRL.paused = !CTRL.paused; syncPlayBtn(); };
+$('#spd').onclick = () => {
+  const seq = [1, 1.5, 2, 0.75];
+  const i = seq.indexOf(CTRL.speed);
+  CTRL.speed = seq[(i + 1) % seq.length];
+  $('#spd').textContent = CTRL.speed.toFixed(2).replace(/0$/, '') + '×';
+};
+$('#replay').onclick = () => start(0);
+
+/* 视图规格抽屉 */
+const SPECS = {
+  brief:{ version:'1.0', intent:'prioritize_open_items', view:{ type:'list', density:'comfortable', sort:'impact_x_slack' },
+    items:[{id:'APR-8821',kind:'approval',sla:'breached_6h',action:'open'},
+           {id:'SO-2041',kind:'delivery_risk',due:'2026-11-22',action:'open'},
+           {id:'PRICE-77',kind:'human_judgement',action:'escalate_to_user'}],
+    actions:['open','pin'] },
+  sourcing:{ version:'1.0', intent:'source_shortage_material', view:{ type:'comparison_matrix', domain:'supplier' },
+    constraint:{ lead_time:'<=48h', framework:true },
+    candidates:['宏远精密','鸿达电子','瑞芯微代'],
+    permission:{ cost_card:'denied', note:'比价不含目标价' },
+    actions:['draft_po','request_quote'] },
+  cash:{ version:'1.0', intent:'forecast_liquidity_gap', view:{ type:'forecast', horizon_days:14 },
+    series:'daily_balance', gap:{ day:9, amount:-3200000 },
+    levers:['delay_payables','accelerate_receivables','credit_line'],
+    actions:['simulate','commit'] },
+  approval:{ version:'1.0', intent:'advance_blocked_approval', view:{ type:'workflow', id:'PR-5512' },
+    nodes:['submit','dept','finance_bp','director','auto_po'],
+    auto_passed:['submit','dept'], current:'finance_bp', days:15,
+    actions:['nudge','escalate'], guard:{ audit:'越级写入不可删除日志' } },
+  yield:{ version:'1.0', intent:'attribute_yield_drop', view:{ type:'evidence_chain' },
+    chain:[{step:'phenomenon',confidence:1.0},{step:'batch',confidence:.92},
+           {step:'equipment',confidence:.88},{step:'root_cause',confidence:.74}],
+    gate:{ confidence_threshold:.8, requires_human:true },
+    actions:['create_workorder','request_onsite'] },
+  guard:{ version:'1.0', intent:'investigate_anomaly', view:{ type:'security_case' },
+    signal:{ account:'crm_liyang', sigma:3.2, rows:8412, geo_mismatch:true },
+    baseline:'30d_behavior', impact:{ interfaces:3, degraded_mode:'ready' },
+    actions:['freeze','observe'], guard:{ evidence_first:true } },
+  diff:{ version:'1.0', intent:'reprioritize_by_margin', view:{ type:'change_proposal' },
+    changes:[{order:'SO-2036',from:3,to:1},{order:'SO-2041',from:1,to:2}],
+    impact:{ margin:'+9.1pt', penalty:32400 }, guard:{ human_signoff:true },
+    actions:['sign','freeze'] },
+  cockpit:{ version:'1.0', intent:'consolidate_learned_paths', view:{ type:'workspace' },
+    pinned:4, schedules:[{cron:'0 8 * * 1', channel:'wecom'}],
+    source:'today_session', auditable:true }
+};
+
+function openSpec(){
+  const k = CUR.kind;
+  if (!k){ toast('还没有生成视图'); return; }
+  const json = JSON.stringify(SPECS[k], null, 2);
+  $('#specCode').innerHTML = json
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/"([^"]+)":/g, '<span class="k">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="s">"$1"</span>')
+    .replace(/: (\d+(?:\.\d+)?|true|false)/g, ': <span class="n">$1</span>');
+  $('#drawer').classList.add('open');
+}
+$('#specBtn').onclick = openSpec;
+$('#drawerClose').onclick = () => $('#drawer').classList.remove('open');
+
+$('#pinBtn').onclick = () => {
+  if (!CUR.kind){ toast('还没有生成视图'); return; }
+  pinCurrent(META[CUR.kind].view);
+  toast(`已固定「${META[CUR.kind].view}」`);
+};
+
+/* ==========================================================
+   7. 启动
+   ========================================================== */
+const _m = location.hash.match(/act=(\d+)/);
+const deepAct = _m ? Math.min(ACTS.length - 1, Math.max(0, +_m[1] - 1)) : 0;
+
+buildRail();
+setRole(ACTS[deepAct].role);
+setTone(ACTS[deepAct].tone);
+markRail(deepAct);
+syncPlayBtn();
+start(deepAct);
+</script>
+</body>
+</html>
