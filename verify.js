@@ -64,11 +64,12 @@ function mkEl(tag = 'div') {
       contains(x) { return this._s.has(x); },
       toggle() {}
     },
-    appendChild(c) { kids.push(c); return c; },
+    appendChild(c) { kids.push(c); c._parent = e; return c; },
     removeChild(c) { const i = kids.indexOf(c); if (i >= 0) kids.splice(i, 1); },
-    remove() {},
+    remove() { const p = e._parent; if (p) { const i = p.children.indexOf(e); if (i >= 0) p.children.splice(i, 1); } },
     insertAdjacentHTML() {},
     get firstElementChild() { return kids[0] || null; },
+    get lastElementChild() { return kids[kids.length - 1] || null; },
     querySelector(s) { if (!sel.has(s)) sel.set(s, mkEl()); return sel.get(s); },
     querySelectorAll() { return []; },
     isConnected: true, offsetWidth: 1, scrollTop: 0, scrollHeight: 0,
@@ -94,7 +95,8 @@ const doc = {
     return t;
   },
   querySelector(s) { if (!registry.has(s)) registry.set(s, mkEl()); return registry.get(s); },
-  querySelectorAll() { return []; }
+  querySelectorAll() { return []; },
+  addEventListener() {}
 };
 
 /* ---------- 6. 在 vm 里跑整个脚本 ---------- */
@@ -114,7 +116,7 @@ vm.createContext(ctx);
 
 let tail = '';
 try {
-  vm.runInContext(scriptBlock + '\n;globalThis.__T={VIEW,META,SPECS,ACTS,CTRL,start};', ctx, { filename: 'app.js', timeout: 20000 });
+  vm.runInContext(scriptBlock + '\n;globalThis.__T={VIEW,META,SPECS,SCENES,TURNS,CTRL,P,send,jump};', ctx, { filename: 'app.js', timeout: 20000 });
   ok.push('脚本求值无异常');
 } catch (e) {
   fail.push('脚本求值抛错: ' + e.message + '\n' + String(e.stack).split('\n').slice(0, 4).join('\n'));
@@ -151,13 +153,30 @@ if (T.VIEW) {
   A(tones.size >= 5, `主题色 ${tones.size} 套，均有 CSS`);
 }
 
-/* ---------- 8. 端到端：整部剧跑完 ---------- */
+/* ---------- 8. 端到端：一条条「发」完整部剧 ---------- */
 (async () => {
 if (T.CTRL) {
   T.CTRL.speed = 5000;            // 时间加速
   const feedEl = doc.querySelector('#feed');
   const stageEl = doc.querySelector('#stage');
-  try { await T.start(0); } catch (e) { errors.push('start: ' + e.message); }
+
+  A(T.SCENES && T.SCENES.length === 8, `剧本幕数 = ${T.SCENES ? T.SCENES.length : '?'}`);
+  A(T.TURNS && T.TURNS.length === 15, `用户可发送的轮数 = ${T.TURNS ? T.TURNS.length : '?'}`);
+  A(T.TURNS.every(t => typeof t.me === 'string' && t.me.length > 0), '每一轮都有唯一的用户话术');
+  A(T.TURNS.filter(t => t.first).length === 8, '每一幕都有开场轮');
+
+  // 初始态：输入框里就是第一条，且还没有任何气泡
+  const cmp0 = doc.querySelector('#cmpText').textContent;
+  A(cmp0 === T.TURNS[0].me, `初始输入框 = "${cmp0}"`);
+  A(feedEl.children.length === 0, '初始对话为空（等你自己发）');
+
+  let guard = 0;
+  try { while (!T.P.done && guard++ < 40) await T.send(); }
+  catch (e) { errors.push('send: ' + e.message); }
+
+  A(T.P.done === true, `发送 ${guard} 轮后结束`);
+  const userMsgs = HTML_LOG.filter(x => x.includes('class="msg me"')).length;
+  A(userMsgs === 15, `对话里 ${userMsgs} 条用户消息（一人一轮）`);
 
   const log = HTML_LOG.join('\n');
   const must = ['今天需要你决定的事', 'MOSFET 驱动 IC', '未来 14 天现金流', 'PR-5512 采购审批',
@@ -165,7 +184,6 @@ if (T.CTRL) {
                 '320 万', '8,412', '9.1 个点'];
   const lost = must.filter(s => !log.includes(s));
   A(lost.length === 0, `8 幕关键内容全部渲染${lost.length ? '（缺：' + lost.join(' / ') + '）' : ''}`);
-  A(feedEl.children.length >= 24, `对话气泡数 = ${feedEl.children.length}`);
   const surfaces = HTML_LOG.filter(x => x.includes('class="surface"')).length;
   A(surfaces >= 8, `画布渲染次数 = ${surfaces}`);
   A(stageEl.children.length === 1, '画布同时只保留一个视图（不堆叠）');
@@ -174,6 +192,7 @@ if (T.CTRL) {
 
   const railEl = doc.querySelector('#rail');
   A(railEl.children.length === 8, `进度轨 = ${railEl.children.length} 段`);
+  A(doc.querySelector('#cmpText').textContent.includes('演示结束'), '结束后输入框给出重播提示');
 }
 
 if (errors.length) fail.push('运行时错误: ' + errors.slice(0, 5).join(' | '));

@@ -86,7 +86,7 @@ main{flex:1;min-height:0;display:flex}
 
 /* ============ chat ============ */
 .chat{width:394px;flex:none;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-right:1px solid var(--line)}
-.feed{flex:1;min-height:0;overflow-y:auto;padding:20px 20px 10px;scroll-behavior:smooth}
+.feed{flex:1;min-height:0;overflow-y:auto;padding:20px 20px 10px;overflow-anchor:none}
 .feed::-webkit-scrollbar{width:8px}
 .feed::-webkit-scrollbar-thumb{background:#e0e4ec;border-radius:8px;border:2px solid #fff}
 
@@ -135,14 +135,81 @@ main{flex:1;min-height:0;display:flex}
 .chatfoot .sp{flex:1}
 .chatfoot .kbd{font-size:10.5px;color:#b6bec9}
 
+/* ============ 输入区（唯一的选项） ============ */
+.composer{flex:none;padding:12px 16px 14px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.35),#fff 42%)}
+.cmp-who{display:flex;align-items:center;gap:8px;font-size:11px;color:#8d97a8;margin-bottom:8px;letter-spacing:.2px}
+.cmp-who .dot{width:6px;height:6px;border-radius:50%;background:var(--tone);box-shadow:0 0 0 3px var(--tone-soft);transition:.4s}
+.cmp-idx{margin-left:auto;font-variant-numeric:tabular-nums;color:#b0b8c6;font-size:10.5px}
+.cmp-box{
+  display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #e3e8f1;border-radius:15px;
+  padding:11px 11px 11px 14px;box-shadow:0 2px 10px -6px rgba(16,24,40,.18);transition:border-color .2s,box-shadow .2s,transform .2s;
+  cursor:pointer;
+}
+.composer.idle .cmp-box:hover{border-color:#c9d3e8;box-shadow:0 6px 18px -10px rgba(16,24,40,.28);transform:translateY(-1px)}
+.composer.busy .cmp-box{background:#fbfcfe;border-style:dashed;cursor:default}
+.cmp-text{flex:1;font-size:13.5px;line-height:1.55;color:#243046;min-width:0}
+.cmp-text.ghost{color:#b7bfcc}
+.cmp-text.in{animation:cmpIn .38s cubic-bezier(.2,.8,.3,1)}
+@keyframes cmpIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.send{
+  width:31px;height:31px;border-radius:10px;border:none;flex:none;display:grid;place-items:center;
+  background:var(--tone);color:#fff;transition:transform .18s,box-shadow .18s;box-shadow:0 6px 14px -8px var(--tone);
+}
+.send svg{width:15px;height:15px}
+.composer.idle .send:hover{transform:translateY(-1px) scale(1.03)}
+.composer.busy .send,.send:disabled{background:#d5dae4;box-shadow:none;cursor:default}
+.cmp-hint{margin-top:8px;font-size:10.5px;color:#b3bbc8;display:flex;align-items:center;gap:6px}
+.cmp-hint .kbd-mini{border:1px solid #e3e8f1;border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:9.5px;color:#9aa3b2}
+.dots{display:inline-flex;gap:3px}
+.dots i{width:3px;height:3px;border-radius:50%;background:currentColor;animation:dotp 1.1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}
+.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dotp{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}
+
+/* 今天的轨迹 */
+.tl{
+  display:flex;margin-top:14px;padding:16px 14px 13px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;position:relative;box-shadow:0 1px 2px rgba(16,24,40,.03);
+}
+.tl:before{content:"";position:absolute;left:58px;right:58px;top:23px;height:1px;background:#e9edf4}
+.tl-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;z-index:1}
+.tl-i .d{width:7px;height:7px;border-radius:50%;background:#fff;border:2px solid #d3dae6;box-sizing:content-box}
+.tl-i.on .d{border-color:var(--tone);background:var(--tone);box-shadow:0 0 0 4px var(--tone-soft)}
+.tl-i b{font-size:10.5px;color:#8f99a8;font-weight:500;font-variant-numeric:tabular-nums}
+.tl-i span{font-size:10px;color:#b3bbc8;letter-spacing:.3px}
+.tl-i.on b{color:#3b4557}
+
+/* 画布空态 */
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px 70px}
+.empty .e-mk{
+  width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:21px;
+  color:var(--tone);background:var(--tone-soft);border:1px solid var(--tone-line);margin-bottom:16px;
+  box-shadow:0 10px 24px -16px var(--tone);
+}
+.empty h3{font-size:15.5px;color:#3b4557;font-weight:600;margin:0 0 9px}
+.empty p{font-size:12.5px;line-height:1.95;color:#98a1b0;margin:0;max-width:420px}
+.empty .e-hint{margin-top:18px;font-size:11.5px;color:#aab3c2;border-top:1px dashed #e5eaf2;padding-top:14px}
+.empty .e-hint b{color:#7c8798;font-weight:500}
+
+/* 切场：色彩掠过 */
+.flash{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity .8s ease;
+  background:radial-gradient(60% 46% at 24% 0%,var(--tone-soft),transparent 72%)}
+.flash.hit{opacity:1;transition:opacity .05s}
+
+/* 场景分隔条 */
+.divider .chap{
+  font-size:9.5px;letter-spacing:.7px;font-weight:650;color:#fff;background:var(--tone);
+  padding:2px 6px;border-radius:5px;margin-right:2px;transition:background .4s;flex:none;
+}
+
 /* ============ canvas ============ */
 .canvas{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:background .6s}
-.canvas[data-tone="ops"]{--tone:#2f4fd8;--tone-soft:#eef1ff;--tone-line:#dbe1f8}
-.canvas[data-tone="buy"]{--tone:#a8620f;--tone-soft:#fdf4e7;--tone-line:#f0dfc2}
-.canvas[data-tone="fin"]{--tone:#13795b;--tone-soft:#e9f6f0;--tone-line:#cdeadd}
-.canvas[data-tone="qms"]{--tone:#6d3fc4;--tone-soft:#f3edfd;--tone-line:#e2d7f9}
-.canvas[data-tone="gov"]{--tone:#b03434;--tone-soft:#fdf0ee;--tone-line:#f3d8d4}
-.canvas[data-tone="dec"]{--tone:#1f3fa8;--tone-soft:#edf1ff;--tone-line:#d8e0fa}
+.app[data-tone="ops"]{--tone:#2f4fd8;--tone-soft:#eef1ff;--tone-line:#dbe1f8}
+.app[data-tone="buy"]{--tone:#a8620f;--tone-soft:#fdf4e7;--tone-line:#f0dfc2}
+.app[data-tone="fin"]{--tone:#13795b;--tone-soft:#e9f6f0;--tone-line:#cdeadd}
+.app[data-tone="qms"]{--tone:#6d3fc4;--tone-soft:#f3edfd;--tone-line:#e2d7f9}
+.app[data-tone="gov"]{--tone:#b03434;--tone-soft:#fdf0ee;--tone-line:#f3d8d4}
+.app[data-tone="dec"]{--tone:#1f3fa8;--tone-soft:#edf1ff;--tone-line:#d8e0fa}
 .canvas:before{
   content:"";position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(circle at 1px 1px,#d5dae4 1px,transparent 0);
@@ -163,6 +230,9 @@ main{flex:1;min-height:0;display:flex}
   transition:.4s;
 }
 .intent .tag:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--tone);opacity:.75}
+.intent .tag.gen{border-style:dashed;background:#fff;color:#98a1b0}
+.intent .tag.gen:before{background:#9aa3b2;animation:blip 1.1s ease-in-out infinite}
+@keyframes blip{0%,100%{opacity:.2}50%{opacity:1}}
 .intent .k{color:#a9b2bf;font-size:11px;letter-spacing:.4px}
 .intent .v{color:var(--ink2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
 .intent .sep{width:1px;height:11px;background:var(--line);flex:none}
@@ -178,9 +248,13 @@ main{flex:1;min-height:0;display:flex}
 .tools button.primary:hover{background:#000;color:#fff}
 .tools svg{width:13px;height:13px;opacity:.85}
 
-.stage{flex:1;min-height:0;overflow-y:auto;padding:4px 26px 88px;position:relative;z-index:2}
-.stage::-webkit-scrollbar{width:10px}
-.stage::-webkit-scrollbar-thumb{background:#dbe0e9;border-radius:10px;border:3px solid transparent;background-clip:content-box}
+.stage{flex:1;min-height:0;position:relative;z-index:2;overflow:hidden}
+.wrap{position:absolute;inset:0;overflow-y:auto;padding:4px 26px 88px;animation:wrapIn .46s cubic-bezier(.2,.7,.3,1) both}
+.wrap.out{animation:wrapOut .3s cubic-bezier(.4,0,1,1) both}
+.wrap::-webkit-scrollbar{width:10px}
+.wrap::-webkit-scrollbar-thumb{background:#dbe0e9;border-radius:10px;border:3px solid transparent;background-clip:content-box}
+@keyframes wrapIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes wrapOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-12px) scale(.995)}}
 
 /* player */
 .player{
@@ -204,10 +278,25 @@ main{flex:1;min-height:0;display:flex}
 .rail .n.now:after{content:"";position:absolute}
 .player .spd{font-size:11px;color:#7b8494;padding:0 6px;height:26px;border-radius:7px;transition:.16s;font-variant-numeric:tabular-nums}
 .player .spd:hover{background:#eff2f8;color:var(--ink)}
+.player .auto{
+  font-size:11px;color:#7b8494;height:26px;padding:0 10px;border-radius:8px;
+  border:1px solid var(--line);background:#fff;transition:.18s;letter-spacing:.3px;
+}
+.player .auto:hover{border-color:#c3cbe0;color:var(--ink)}
+.player .auto.on{background:#111827;border-color:#111827;color:#fff}
 
 /* ============ surface ============ */
-.surface{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
-@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.994)}to{opacity:1;transform:none}}
+.surface > *{animation:riseIn .52s cubic-bezier(.2,.75,.3,1) both}
+.surface > *:nth-child(2){animation-delay:.045s}
+.surface > *:nth-child(3){animation-delay:.09s}
+.surface > *:nth-child(4){animation-delay:.135s}
+.surface > *:nth-child(5){animation-delay:.18s}
+.surface > *:nth-child(6){animation-delay:.22s}
+@keyframes riseIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .chip,.msg,.divider,.trace .tr,.cmp-text,.wrap,.wrap.out,.surface > *,.cock .c,.role .tx,.role .av,
+  .typing i,.live i,.dots i,.node.now .dot,.intent .tag.gen:before{animation:none!important}
+}
 
 .s-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:8px 0 18px}
 .eyebrow{
@@ -452,12 +541,12 @@ main{flex:1;min-height:0;display:flex}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app" data-tone="ops">
 
   <header class="top">
     <div class="brand">
       <div class="mark"></div>
-      <div><b>Nexus ERP</b> <span>· 一天的智能 · 自动演示</span></div>
+      <div><b>Nexus ERP</b> <span>· 一天的智能 · 十五次对话，八个场景</span></div>
     </div>
     <div class="ws" id="ws">
       <span class="ws-label">今天固定的</span>
@@ -472,14 +561,23 @@ main{flex:1;min-height:0;display:flex}
   <main>
     <aside class="chat">
       <div class="feed" id="feed"></div>
-      <div class="chatfoot">
-        <span class="live"><i></i>自动演示</span>
-        <span class="sp"></span>
-        <span class="kbd" id="actLabel">第 1 / 8 幕</span>
+      <div class="composer" id="composer">
+        <div class="cmp-who">
+          <span class="dot"></span><span id="cmpRole">运营总监 林澈</span>
+          <span class="cmp-idx" id="actLabel">第 1 / 8 幕</span>
+        </div>
+        <div class="cmp-box" id="cmpBox">
+          <span class="cmp-text" id="cmpText">今天有什么要我处理的？</span>
+          <button class="send" id="sendBtn" title="发送（回车）">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+        <div class="cmp-hint" id="cmpHint">唯一的选项 · 按 <span class="kbd-mini">Enter</span> 直接发送</div>
       </div>
     </aside>
 
-    <section class="canvas" id="canvas" data-tone="ops">
+    <section class="canvas" id="canvas">
+      <div class="flash" id="flash"></div>
       <div class="canvas-head">
         <div class="intent">
           <span class="tag" id="iTag">待机</span>
@@ -504,13 +602,9 @@ main{flex:1;min-height:0;display:flex}
       <div class="stage" id="stage"></div>
 
       <div class="player">
-        <button class="ic" id="pp" title="暂停 / 继续">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="7" y="5" width="3.4" height="14" rx="1"/><rect x="13.6" y="5" width="3.4" height="14" rx="1"/></svg>
-        </button>
-        <div class="sp"></div>
         <div class="rail" id="rail"></div>
         <div class="sp"></div>
-        <button class="spd" id="spd">1.0×</button>
+        <button class="auto" id="auto" title="自动播放：每 1.6 秒自动发送下一条">自动</button>
         <button class="ic" id="replay" title="重播">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 1 0 3-6.7L3 7"/><path d="M3 3v4h4"/></svg>
         </button>
@@ -536,7 +630,7 @@ main{flex:1;min-height:0;display:flex}
    ========================================================== */
 const $ = (s, r = document) => r.querySelector(s);
 const el = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content.firstElementChild; };
-const feed = $('#feed'), stage = $('#stage'), canvas = $('#canvas'), rail = $('#rail');
+const feed = $('#feed'), stage = $('#stage'), canvas = $('#canvas'), rail = $('#rail'), app = $('#app');
 const sleepREAL = (ms) => new Promise(r => setTimeout(r, ms));
 
 const CTRL = { paused:false, speed:1, token:0 };
@@ -564,13 +658,18 @@ const ai = (t) => t
   .replace(/`([^`]+)`/g, '<code>$1</code>')
   .replace(/\*\*/g, '');
 
-function scrollFeed(){ feed.scrollTop = feed.scrollHeight; }
+function scrollFeed(){
+  const go = () => { feed.scrollTop = feed.scrollHeight; };
+  go();
+  requestAnimationFrame(go);
+  setTimeout(go, 80);
+}
 
 /* ==========================================================
    1. 对话渲染
    ========================================================== */
-function addDivider(text){
-  feed.appendChild(el(`<div class="divider"><span class="line"></span><span class="tx"><i></i>${text}<i></i></span><span class="line"></span></div>`));
+function addDivider(text, no){
+  feed.appendChild(el(`<div class="divider"><span class="line"></span><span class="tx">${no ? `<span class="chap">第 ${no} 幕</span>` : ''}${text}</span><span class="line"></span></div>`));
   scrollFeed();
 }
 
@@ -642,31 +741,32 @@ const META = {
   cockpit:{ intent:'今天的沉淀', view:'工作台', data:'全部域' },
 };
 
-function render(kind){
+function render(kind, my){
   const html = VIEW[kind]();
-  const myTok = CTRL.token;
-  const old = stage.firstElementChild;
+  const myGen = ++VIEWGEN;
+  const old = stage.lastElementChild;
+  const wrap = el(`<div class="wrap"><div class="surface">${html}</div></div>`);
+  stage.appendChild(wrap);
   if (old){
-    old.style.transition = 'opacity .18s, transform .18s';
-    old.style.opacity = '0';
-    old.style.transform = 'translateY(-8px)';
+    old.classList.add('out');
+    setTimeout(() => old.remove(), 320);
   }
+  const m = META[kind];
+  $('#iIntent').textContent = m.intent;
+  $('#iView').textContent = m.view;
+  $('#iData').textContent = m.data;
+  $('#iTag').textContent = '生成中';
+  $('#iTag').classList.add('gen');
   setTimeout(() => {
-    if (myTok !== CTRL.token) return;
-    stage.innerHTML = '';
-    const node = el(`<div class="surface">${html}</div>`);
-    stage.appendChild(node);
-    stage.scrollTop = 0;
-    const m = META[kind];
-    $('#iIntent').textContent = m.intent;
-    $('#iView').textContent = m.view;
-    $('#iData').textContent = m.data;
-    $('#iTag').textContent = '生成中';
-    setTimeout(() => { if (kind === CUR.kind) $('#iTag').textContent = '已生成'; }, 620);
-    CUR = { kind, html };
-    node.querySelectorAll('.s-meta b, .lever .v, .alert .kv .v, .big-num').forEach(countUp);
-  }, old ? 190 : 0);
+    if (myGen !== VIEWGEN) return;
+    $('#iTag').classList.remove('gen');
+    $('#iTag').textContent = '已生成';
+  }, 640);
+  CUR = { kind, html };
+  wrap.querySelectorAll('.s-meta b, .lever .v, .alert .kv .v, .big-num').forEach(countUp);
 }
+
+let VIEWGEN = 0;
 
 let CUR = { kind:null, html:'' };
 
@@ -1020,6 +1120,10 @@ const VIEW = {
         <div class="sp"></div>
         <div class="badge">已排程 · 推送到企业微信</div>
       </div>`
+    + `<div class="tl">${[
+        ['08:12','简报','s'],['08:26','寻源','s'],['09:03','资金','s'],['09:41','审批','s'],
+        ['14:20','归因','s'],['16:05','安全','s'],['17:30','排产','s'],['18:00','沉淀','on'],
+      ].map(([t, n, k], i) => `<div class="tl-i ${k}"><i class="d"></i><b>${t}</b><span>${n}</span></div>`).join('')}</div>`
     + sFoot('沉淀 · 对话 → 视图 → 入口 · 全部可审计', '生成于 18:00');
   }
 };
@@ -1038,7 +1142,7 @@ function setRole(r){
   box.classList.add('swap');
 }
 
-function setTone(t){ canvas.dataset.tone = t; }
+function setTone(t){ app.dataset.tone = t; }
 
 function pinCurrent(name){
   const ws = $('#ws');
@@ -1057,167 +1161,303 @@ function toast(msg){
 /* ==========================================================
    5. 剧本
    ========================================================== */
-const ACTS = [
+const SCENES = [
   {
-    no:1, tone:'ops',
+    no:1, tone:'ops', title:'晨间简报',
     role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
     line:'08:12 · 运营总监 林澈 · 总部',
     pin:'晨间简报',
-    run: async (h) => {
-      await h.me('今天有什么要我处理的？');
-      await h.say('三条。**只有一条真的超时** —— 另外两条还有缓冲，可以等。\n\n超时的那条压着一张 ¥1.62M 的订单，罚则 ¥32,400 / 周。',
-        { trace:['读取审批中心 · 12 条待办', '关联订单域 · 3 条风险', '按影响面 × 剩余时间排序'] });
-      await h.show('brief');
-      await h.hold(2600);
-      await h.say('第三条我不做判断。它涉及渠道政策，模型给不出建议 —— 这类事留给你，不瞎猜。');
-      await h.pin();
-    }
+    turns:[
+      { me:'今天有什么要我处理的？', run: async (h) => {
+        await h.say('三条。**只有一条真的超时** —— 另外两条还有缓冲，可以等。\n\n超时的那条压着一张 ¥1.62M 的订单，罚则 ¥32,400 / 周。',
+          { trace:['读取审批中心 · 12 条待办', '关联订单域 · 3 条风险', '按影响面 × 剩余时间排序'] });
+        await h.show('brief');
+        await h.hold(1600);
+        await h.say('第三条我不做判断。它涉及渠道政策，模型给不出建议 —— 这类事留给你，不瞎猜。');
+        await h.pin();
+      } }
+    ]
   },
   {
-    no:2, tone:'buy',
+    no:2, tone:'buy', title:'缺料寻源',
     role:{ av:'周', name:'采购员 周野', org:'采购中心 · 结构件组', color:'#b5762a' },
     line:'08:26 · 视角切到 采购中心',
     pin:'缺料寻源',
-    run: async (h) => {
-      await h.me('PR-5512 这颗料能今天定吗？');
-      await h.say('三家能给到 48 小时，但只有一家同时满足**协议价**和**账期**。\n\n先说清楚：成本卡我没权限调，这次比价只用公开报价和历史成交价。',
-        { trace:['框架协议 · 4 家合格供应商', '历史成交价 · 17 笔', '交期约束 · 48h 内到料'] });
-      await h.show('sourcing');
-      await h.hold(2600);
-      await h.me('那就定宏远。');
-      await h.say('草稿已生成：PO-8841，1,200 pcs，单价上浮 3.1% —— 仍在协议 5% 弹性内，不用惊动上级。\n\n**越权的事我不做，边界内的事你不用管。**');
-      await h.hold(1200);
-      await h.pin();
-    }
+    turns:[
+      { me:'PR-5512 这颗料能今天定吗？', run: async (h) => {
+        await h.say('三家能给到 48 小时，但只有一家同时满足**协议价**和**账期**。\n\n先说清楚：成本卡我没权限调，这次比价只用公开报价和历史成交价。',
+          { trace:['框架协议 · 4 家合格供应商', '历史成交价 · 17 笔', '交期约束 · 48h 内到料'] });
+        await h.show('sourcing');
+      } },
+      { me:'那就定宏远。', run: async (h) => {
+        await h.say('草稿已生成：PO-8841，1,200 pcs，单价上浮 3.1% —— 仍在协议 5% 弹性内，不用惊动上级。\n\n**越权的事我不做，边界内的事你不用管。**');
+        await h.hold(600);
+        await h.pin();
+      } }
+    ]
   },
   {
-    no:3, tone:'fin',
+    no:3, tone:'fin', title:'资金计划',
     role:{ av:'张', name:'财务 BP 张宁', org:'财务中心 · 资金', color:'#187a52' },
     line:'09:03 · 视角切到 财务中心',
     pin:'现金流 14 天',
-    run: async (h) => {
-      await h.me('未来两周现金有缺口吗？');
-      await h.say('第 9 天有个 **320 万** 的缺口。\n\n挪三笔付款 4 天，成本 4.2 万；或者等两笔应收 —— 但它们历史回款率只有 61%，我不建议押这个。',
-        { trace:['应收 · 38 笔', '应付 · 52 笔', '银行账户 · 6 个', '滚动 14 天预测'] });
-      await h.show('cash');
-      await h.hold(2800);
-      await h.me('那先把宏远的付了，剩下的往后挪。');
-      await h.say('挪好了。4.2 万的成本挂在「资金调度」科目下。\n\n还有件事：**PR-5512 压在我这儿不是忘了**，它这两天在跟现金流打架。今天下午我会处理。');
-      await h.hold(1400);
-      await h.pin();
-    }
+    turns:[
+      { me:'未来两周现金有缺口吗？', run: async (h) => {
+        await h.say('第 9 天有个 **320 万** 的缺口。\n\n挪三笔付款 4 天，成本 4.2 万；或者等两笔应收 —— 但它们历史回款率只有 61%，我不建议押这个。',
+          { trace:['应收 · 38 笔', '应付 · 52 笔', '银行账户 · 6 个', '滚动 14 天预测'] });
+        await h.show('cash');
+      } },
+      { me:'那先把宏远的付了，剩下的往后挪。', run: async (h) => {
+        await h.say('挪好了。4.2 万的成本挂在「资金调度」科目下。\n\n还有件事：**PR-5512 压在我这儿不是忘了**，它这两天在跟现金流打架。今天下午我会处理。');
+        await h.hold(700);
+        await h.pin();
+      } }
+    ]
   },
   {
-    no:4, tone:'dec',
+    no:4, tone:'dec', title:'卡住的审批',
     role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
     line:'09:41 · 回到 运营中心',
     pin:null,
-    run: async (h) => {
-      await h.say('她卡了你 15 天，不一定是因为流程慢 —— 她手上有一个 320 万的缺口。\n\n催办之前，也许该先问一句「你是不是在忙别的」。');
-      await h.show('approval');
-      await h.hold(1400);
-      await h.me('不越级。帮我把信息递过去，让她能快速判断。');
-      await h.say('递了。附了三样东西：罚则敞口、替代方案、以及「今天批，回款能提前 9 天」。\n\n**卡点信息比催促本身有用。**',
-        { trace:['读取该单上下文 · 6 项', '生成 3 段决策摘要', '推送至财务 BP 工作台'] });
-      await h.hold(2400);
-      await h.me('你不是有越级权限吗？为什么不直接用。');
-      await h.say('有。但越级会在审计日志里留一条永久的标记，而这件事的根因不在流程，在信息。\n\n**能绕过流程，不等于应该绕过。**');
-      await h.hold(600);
-    }
+    turns:[
+      { me:'PR-5512 还是卡着，到底为什么？', run: async (h) => {
+        await h.say('她卡了你 15 天，不一定是因为流程慢 —— 她手上有一个 320 万的缺口。\n\n催办之前，也许该先问一句「你是不是在忙别的」。');
+        await h.show('approval');
+      } },
+      { me:'不越级。帮我把信息递过去，让她能快速判断。', run: async (h) => {
+        await h.say('递了。附了三样东西：罚则敞口、替代方案、以及「今天批，回款能提前 9 天」。\n\n**卡点信息比催促本身有用。**',
+          { trace:['读取该单上下文 · 6 项', '生成 3 段决策摘要', '推送至财务 BP 工作台'] });
+      } },
+      { me:'你不是有越级权限吗？为什么不直接用。', run: async (h) => {
+        await h.say('有。但越级会在审计日志里留一条永久的标记，而这件事的根因不在流程，在信息。\n\n**能绕过流程，不等于应该绕过。**');
+      } }
+    ]
   },
   {
-    no:5, tone:'qms',
+    no:5, tone:'qms', title:'良率归因',
     role:{ av:'陈', name:'质量工程师 陈默', org:'制造中心 · 质量管理', color:'#6d3fc4' },
     line:'14:20 · 视角切到 制造中心',
     pin:'良率证据链',
-    run: async (h) => {
-      await h.me('SO-2036 良率掉到 91%，帮我看看是哪的问题。');
-      await h.say('不是供应商的问题，是设备。\n\n证据链在右边，每一环都标了置信度 —— 最后一环只有 **74%**，需要现场确认。',
-        { trace:['MES 工单 · 2,100 条', 'QMS 不良记录 · 148 条', '设备台账 · 12 台', 'PLM 参数版本 · 3 个'] });
-      await h.show('yield');
-      await h.hold(3000);
-      await h.me('影响多大？');
-      await h.say('3 张在制订单、420 件待复检。校准会让 A7 停线 **4 小时**，产能损失约 ¥86,000。\n\n工单我可以直接开，但停线这个决定 —— 我给建议，你签字。');
-      await h.hold(1000);
-      await h.pin();
-    }
+    turns:[
+      { me:'SO-2036 良率掉到 91%，帮我看看是哪的问题。', run: async (h) => {
+        await h.say('不是供应商的问题，是设备。\n\n证据链在右边，每一环都标了置信度 —— 最后一环只有 **74%**，需要现场确认。',
+          { trace:['MES 工单 · 2,100 条', 'QMS 不良记录 · 148 条', '设备台账 · 12 台', 'PLM 参数版本 · 3 个'] });
+        await h.show('yield');
+      } },
+      { me:'影响多大？', run: async (h) => {
+        await h.say('3 张在制订单、420 件待复检。校准会让 A7 停线 **4 小时**，产能损失约 ¥86,000。\n\n工单我可以直接开，但停线这个决定 —— 我给建议，你签字。');
+        await h.hold(600);
+        await h.pin();
+      } }
+    ]
   },
   {
-    no:6, tone:'gov',
+    no:6, tone:'gov', title:'安全巡检',
     role:{ av:'沈', name:'系统管理员 沈屿', org:'数字化中心 · 平台', color:'#b03434' },
     line:'16:05 · 视角切到 数字化中心',
     pin:null,
-    run: async (h) => {
-      await h.me('今天有异常吗？');
-      await h.say('一条。`crm_liyang` 在 02:14 导出了 **8,412 条**客户主数据，超出它日常 3.2 个标准差，IP 在新加坡 —— 这个账号近 90 天都在苏州。',
-        { trace:['登录日志 · 41,206 条', '导出行为基线 · 30 天', '权限变更 · 6 条', 'IP 归属地比对'] });
-      await h.show('guard');
-      await h.hold(2800);
-      await h.me('冻结，同时通知 DPO。');
-      await h.say('冻结了。DPO 收到带证据包的工单，下游 3 个接口已切到降级开关，业务无感。\n\n**取证在前、处置在后** —— 顺序反了，就追不回来了。');
-      await h.hold(1200);
-    }
+    turns:[
+      { me:'今天有异常吗？', run: async (h) => {
+        await h.say('一条。`crm_liyang` 在 02:14 导出了 **8,412 条**客户主数据，超出它日常 3.2 个标准差，IP 在新加坡 —— 这个账号近 90 天都在苏州。',
+          { trace:['登录日志 · 41,206 条', '导出行为基线 · 30 天', '权限变更 · 6 条', 'IP 归属地比对'] });
+        await h.show('guard');
+      } },
+      { me:'冻结，同时通知 DPO。', run: async (h) => {
+        await h.say('冻结了。DPO 收到带证据包的工单，下游 3 个接口已切到降级开关，业务无感。\n\n**取证在前、处置在后** —— 顺序反了，就追不回来了。');
+      } }
+    ]
   },
   {
-    no:7, tone:'dec',
+    no:7, tone:'dec', title:'排产取舍',
     role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
     line:'17:30 · 回到 运营中心',
     pin:null,
-    run: async (h) => {
-      await h.me('排产要不要为了毛利调一下？');
-      await h.say('能多 **9.1 个点** 综合毛利。代价是 SO-2041 顺延 2 天，¥32,400 罚金 —— 而且那是瑞恒电子，我们 Q1 最大的客户。\n\n模型算得出钱，算不出这张脸。',
-        { trace:['订单毛利 · 24 张', '违约条款 · 9 条', '客户分级 · 4 档', '模拟 3 种排产方案'] });
-      await h.show('diff');
-      await h.hold(2900);
-      await h.me('冻结。我不签。');
-      await h.say('冻结了，提案留到周一复盘。\n\n签字这件事我不替你做 —— **它是我今天唯一没帮你省掉的动作**。');
-      await h.hold(1000);
-    }
+    turns:[
+      { me:'排产要不要为了毛利调一下？', run: async (h) => {
+        await h.say('能多 **9.1 个点** 综合毛利。代价是 SO-2041 顺延 2 天，¥32,400 罚金 —— 而且那是瑞恒电子，我们 Q1 最大的客户。\n\n模型算得出钱，算不出这张脸。',
+          { trace:['订单毛利 · 24 张', '违约条款 · 9 条', '客户分级 · 4 档', '模拟 3 种排产方案'] });
+        await h.show('diff');
+      } },
+      { me:'冻结。我不签。', run: async (h) => {
+        await h.say('冻结了，提案留到周一复盘。\n\n签字这件事我不替你做 —— **它是我今天唯一没帮你省掉的动作**。');
+      } }
+    ]
   },
   {
-    no:8, tone:'ops',
+    no:8, tone:'ops', title:'今天的沉淀',
     role:{ av:'林', name:'运营总监 林澈', org:'总部 · 运营中心', color:'#2f4fd8' },
     line:'18:00 · 同一个人 · 明天早上',
     pin:null,
-    run: async (h) => {
-      await h.show('cockpit');
-      await h.say('今天你做了 6 个决定，其中 4 个我已经做成了固定入口。',
-        { trace:['汇总今日会话 · 26 轮', '提取可复用路径 · 4 条', '注册为自动化任务'] });
-      await h.hold(3600);
-      await h.say('下周一 08:00，这份简报会自己出现在这里 —— 你不用再问一次。\n\n**界面没有变多，是因为它记住了。**');
-      await h.hold(1200);
-    }
+    turns:[
+      { me:'今天结束了，帮我回顾一下。', run: async (h) => {
+        await h.show('cockpit');
+        await h.say('今天你做了 6 个决定，其中 4 个我已经做成了固定入口。',
+          { trace:['汇总今日会话 · 26 轮', '提取可复用路径 · 4 条', '注册为自动化任务'] });
+        await h.hold(2400);
+        await h.say('下周一 08:00，这份简报会自己出现在这里 —— 你不用再问一次。\n\n**界面没有变多，是因为它记住了。**');
+      } }
+    ]
   }
 ];
 
+
 /* ==========================================================
-   6. 播放器
+   6. 播放引擎 —— 用户自己发，但只有唯一的选项
    ========================================================== */
-function mkHelpers(my){
-  const alive = () => my === CTRL.token;
+const TURNS = [];
+SCENES.forEach((s, si) => s.turns.forEach((t, ti) =>
+  TURNS.push({ si, ti, first: ti === 0, me: t.me, run: t.run })));
+
+const P = { i: 0, busy: false, done: false, auto: false };
+let autoTimer = null;
+
+const alive = (my) => my === CTRL.token;
+
+function mkHelpers(my, si){
   return {
-    me: async (t) => { if (!alive()) return; await wait(500); if (!alive()) return; addUser(t); await wait(620); },
-    say: async (t, o = {}) => { if (!alive()) return; await wait(o.delay ?? 520); if (!alive()) return; await addBot(t, my, o); },
-    show: async (k) => { if (!alive()) return; await wait(420); if (!alive()) return; render(k); },
-    hold: async (ms) => { if (!alive()) return; await wait(ms); },
+    say: async (t, o = {}) => { if (!alive(my)) return; await wait(o.delay ?? 560); if (!alive(my)) return; await addBot(t, my, o); },
+    show: async (k) => { if (!alive(my)) return; await wait(460); if (!alive(my)) return; render(k, my); },
+    hold: async (ms) => { if (!alive(my)) return; await wait(ms); },
     pin: async () => {
-      if (!alive()) return;
-      const act = ACTS[CUR_ACT];
-      if (!act.pin) return;
-      await wait(700); if (!alive()) return;
-      pinCurrent(act.pin);
-      toast(`已固定「${act.pin}」到工作台`);
+      const sc = SCENES[si];
+      if (!alive(my) || !sc.pin) return;
+      await wait(700); if (!alive(my)) return;
+      pinCurrent(sc.pin);
+      toast(`已固定「${sc.pin}」到工作台`);
     }
   };
 }
 
-let CUR_ACT = 0;
+/* 进入新的一幕：身份、主题色、进度轨、色彩掠过 */
+function enterScene(si){
+  const sc = SCENES[si];
+  setRole(sc.role);
+  setTone(sc.tone);
+  markRail(si);
+  const f = $('#flash');
+  f.classList.add('hit');
+  setTimeout(() => f.classList.remove('hit'), 60);
+}
+
+/* 输入区：永远只有一个选项 */
+function setComposer(){
+  const box = $('#composer');
+  box.classList.toggle('busy', P.busy);
+  box.classList.toggle('idle', !P.busy && !P.done);
+  const txt = $('#cmpText'), btn = $('#sendBtn'), hint = $('#cmpHint');
+  btn.disabled = P.busy || P.done;
+  if (P.done){
+    txt.textContent = '演示结束 —— 点右下角 ↻ 重播';
+    txt.classList.add('ghost');
+    hint.innerHTML = '或者点下面的进度条，跳到任意一幕';
+    return;
+  }
+  if (P.busy){
+    txt.textContent = '助手正在组织这一屏…';
+    txt.classList.add('ghost');
+    hint.innerHTML = '<span class="dots"><i></i><i></i><i></i></span> 正在生成视图';
+    return;
+  }
+  const t = TURNS[P.i], sc = SCENES[t.si];
+  txt.classList.remove('ghost');
+  txt.textContent = t.me;
+  txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in');
+  hint.innerHTML = '唯一的选项 · 按 <span class="kbd-mini">Enter</span> 直接发送';
+  $('#cmpRole').textContent = sc.role.name;
+  const dot = box.querySelector('.cmp-who .dot');
+  dot.style.background = sc.role.color;
+  dot.style.boxShadow = '0 0 0 3px ' + sc.role.color + '1f';
+}
+
+async function playTurn(n){
+  const t = TURNS[n];
+  const my = ++CTRL.token;
+  P.busy = true;
+  setComposer();
+  const sc = SCENES[t.si];
+  if (t.first){
+    enterScene(t.si);
+    await wait(440); if (!alive(my)) return;
+    addDivider(sc.line, sc.no);
+    await wait(560); if (!alive(my)) return;
+  }
+  addUser(t.me);
+  await wait(720); if (!alive(my)) return;
+  await t.run(mkHelpers(my, t.si));
+  if (!alive(my)) return;
+  P.busy = false;
+  P.i = n + 1;
+  if (P.i >= TURNS.length){
+    P.done = true;
+    setComposer();
+    finish();
+    return;
+  }
+  setComposer();
+  if (P.auto) scheduleAuto();
+}
+
+function send(){
+  if (P.busy || P.done) return;
+  clearTimeout(autoTimer);
+  return playTurn(P.i);
+}
+
+function scheduleAuto(){
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() => { if (P.auto && !P.busy && !P.done) send(); }, 1500);
+}
+
+function jump(si){
+  CTRL.token++;
+  clearTimeout(autoTimer);
+  P.busy = false; P.done = false;
+  resetAll();
+  for (let i = 0; i < si; i++) if (SCENES[i].pin) pinCurrent(SCENES[i].pin);
+  P.i = TURNS.findIndex(t => t.si === si);
+  enterScene(si);
+  setComposer();
+}
+
+function stageEmpty(){
+  stage.innerHTML = '';
+  stage.appendChild(el(`<div class="wrap"><div class="empty">
+    <div class="e-mk">✦</div>
+    <h3>右边的画布现在是空的</h3>
+    <p>你说一句话，它就会长出一样东西 —— 待办简报、比价矩阵、现金流、审批流、证据链。<br>不是打开新页面，是同一块画布换了一种投影。</p>
+    <div class="e-hint">点左下角那条<b>唯一的选项</b>，或者按回车</div>
+  </div></div>`));
+  $('#iTag').textContent = '待机';
+  $('#iTag').classList.remove('gen');
+  $('#iIntent').textContent = '—';
+  $('#iView').textContent = '—';
+  $('#iData').textContent = '—';
+}
+
+function resetAll(){
+  feed.innerHTML = '';
+  $('#ws').querySelectorAll('.chip').forEach(c => c.remove());
+  const empty = $('#wsEmpty');
+  if (empty) empty.style.display = '';
+  CUR = { kind:null, html:'' };
+  stageEmpty();
+}
+
+function finish(){
+  [...rail.children].forEach(n => { n.className = 'n done'; });
+  $('#actLabel').textContent = '演示结束 · 8 幕';
+  feed.appendChild(el(`<div class="finish" style="margin:10px 0 6px;display:flex;align-items:center;gap:10px;font-size:11.5px;color:#9aa3b0">
+    <span style="width:5px;height:5px;border-radius:50%;background:#2f9e6b"></span>演示结束 · 点 ↻ 重播，或点进度条跳到任意一幕
+  </div>`));
+  scrollFeed();
+  toast('演示结束 —— 谢谢看完');
+}
 
 function buildRail(){
   rail.innerHTML = '';
-  ACTS.forEach((a, i) => {
-    const n = el(`<div class="n" title="${a.role.name} · ${a.line}">${String(a.no).padStart(2, '0')}</div>`);
-    n.onclick = () => start(i);
+  SCENES.forEach((s, i) => {
+    const n = el(`<div class="n" title="第 ${i + 1} 幕 · ${s.title} · ${s.role.name}">${String(s.no).padStart(2, '0')}</div>`);
+    n.onclick = () => jump(i);
     rail.appendChild(n);
   });
 }
@@ -1225,79 +1465,23 @@ function markRail(i){
   [...rail.children].forEach((n, j) => {
     n.className = 'n' + (j < i ? ' done' : j === i ? ' now' : '');
   });
-  $('#actLabel').textContent = `第 ${i + 1} / ${ACTS.length} 幕`;
-}
-
-function resetAll(){
-  feed.innerHTML = '';
-  stage.innerHTML = '';
-  $('#ws').querySelectorAll('.chip').forEach(c => c.remove());
-  const empty = $('#wsEmpty');
-  if (empty) empty.style.display = '';
-  CUR = { kind:null, html:'' };
-  $('#iTag').textContent = '待机';
-  $('#iIntent').textContent = '—';
-  $('#iView').textContent = '—';
-  $('#iData').textContent = '—';
-}
-
-async function start(from = 0){
-  CTRL.token++;
-  const my = CTRL.token;
-  CTRL.paused = false;
-  syncPlayBtn();
-  resetAll();
-
-  // 跳到某一幕时，把之前的固定入口一次性补上
-  for (let i = 0; i < from; i++) if (ACTS[i].pin) pinCurrent(ACTS[i].pin);
-
-  for (let i = from; i < ACTS.length; i++){
-    if (my !== CTRL.token) return;
-    CUR_ACT = i;
-    const act = ACTS[i];
-    setRole(act.role);
-    setTone(act.tone);
-    markRail(i);
-    await sleepREAL(420);
-    if (my !== CTRL.token) return;
-    addDivider(act.line);
-    await sleepREAL(620);
-    if (my !== CTRL.token) return;
-    await act.run(mkHelpers(my));
-    if (my !== CTRL.token) return;
-    await sleepREAL(260);
-  }
-  if (my === CTRL.token) finish();
-}
-
-function finish(){
-  markRail(ACTS.length - 1);
-  [...rail.children].forEach(n => n.classList.add('done'));
-  [...rail.children].forEach(n => n.classList.remove('now'));
-  $('#actLabel').textContent = '演示结束';
-  const last = el(`<div class="finish" style="margin:10px 0 6px;display:flex;align-items:center;gap:10px;font-size:11.5px;color:#9aa3b0">
-    <span style="width:5px;height:5px;border-radius:50%;background:#2f9e6b"></span>演示结束 · 点右下角 ↻ 重播，或点进度条跳到任意一幕
-  </div>`);
-  feed.appendChild(last);
-  scrollFeed();
-}
-
-function syncPlayBtn(){
-  const icon = CTRL.paused
-    ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M8 5l12 7-12 7z"/></svg>'
-    : '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="7" y="5" width="3.4" height="14" rx="1"/><rect x="13.6" y="5" width="3.4" height="14" rx="1"/></svg>';
-  $('#pp').innerHTML = icon;
+  $('#actLabel').textContent = `第 ${i + 1} / ${SCENES.length} 幕 · ${SCENES[i].title}`;
 }
 
 /* 控件 */
-$('#pp').onclick = () => { CTRL.paused = !CTRL.paused; syncPlayBtn(); };
-$('#spd').onclick = () => {
-  const seq = [1, 1.5, 2, 0.75];
-  const i = seq.indexOf(CTRL.speed);
-  CTRL.speed = seq[(i + 1) % seq.length];
-  $('#spd').textContent = CTRL.speed.toFixed(2).replace(/0$/, '') + '×';
+$('#cmpBox').onclick = () => send();
+$('#auto').onclick = () => {
+  P.auto = !P.auto;
+  $('#auto').classList.toggle('on', P.auto);
+  if (P.auto && !P.busy && !P.done) scheduleAuto(); else clearTimeout(autoTimer);
 };
-$('#replay').onclick = () => start(0);
+$('#replay').onclick = () => jump(0);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey){ e.preventDefault(); send(); }
+});
+
+/* 供校验脚本 / 控制台调用 */
+window.__demo = { send, jump, state: () => P, turns: TURNS, scenes: SCENES };
 
 /* 视图规格抽屉 */
 const SPECS = {
@@ -1361,14 +1545,14 @@ $('#pinBtn').onclick = () => {
    7. 启动
    ========================================================== */
 const _m = location.hash.match(/act=(\d+)/);
-const deepAct = _m ? Math.min(ACTS.length - 1, Math.max(0, +_m[1] - 1)) : 0;
+const deepAct = _m ? Math.min(SCENES.length - 1, Math.max(0, +_m[1] - 1)) : 0;
 
 buildRail();
-setRole(ACTS[deepAct].role);
-setTone(ACTS[deepAct].tone);
-markRail(deepAct);
-syncPlayBtn();
-start(deepAct);
+resetAll();
+for (let i = 0; i < deepAct; i++) if (SCENES[i].pin) pinCurrent(SCENES[i].pin);
+P.i = TURNS.findIndex(t => t.si === deepAct);
+enterScene(deepAct);
+setComposer();
 </script>
 </body>
 </html>
